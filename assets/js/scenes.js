@@ -302,15 +302,7 @@ window.CC_SCENE = (() => {
     const r = rng(seedOf(id));
     let body;
     if (blend) {
-      if (blend.baseFamily === 'kitty' || blend.accentFamily === 'kitty') {
-        body = S.cybercard(p, s, r, 'mashup', id);
-        return `<svg class="scene" viewBox="0 0 ${W} ${H}" aria-hidden="true">${body}</svg>`;
-      }
-      const a = inner(blend.baseFamily, p, `${s}a`, r), b = inner(blend.accentFamily, p, `${s}b`, r);
-      body = `<defs><clipPath id="L${s}"><path d="M0 0H96L64 80H0Z"/></clipPath><clipPath id="R${s}"><path d="M96 0H${W}V${H}H64Z"/></clipPath>${glow(s)}</defs>
-        <g clip-path="url(#L${s})">${a}</g><g clip-path="url(#R${s})">${b}</g>
-        <path d="M96 0L64 80" stroke="${c(p, 'white')}" stroke-width="1.6" filter="url(#gl${s})"/>
-        <g transform="translate(80 40)"><rect x="-7" y="-7" width="14" height="14" transform="rotate(45)" fill="${c(p, 'bg')}" stroke="${c(p, 'hot_pink')}" stroke-width="1.2"/><path d="M-2.6-2.6l5.2 5.2M2.6-2.6l-5.2 5.2" stroke="${c(p, 'white')}" stroke-width="1.3"/></g>`;
+      body = S.cybercard(p, s, r, 'mashup', id);
     } else if (['cybercore-tech', 'alien', 'cyberdark', 'cyberdark-grid', 'cyberdark-industrial', 'cyberdark-ops', 'cyberdyne', 'cyberpunk', 'cyborg', 'dark-futurism', 'dark-skylines', 'default', 'dystopian', 'dystopian-frontier', 'futuristic', 'neon-noir', 'neosynth', 'night-ops', 'omarchy-live', 'plasma-core', 'signal-cities', 'synth-industrial', 'synthwave', 'terminal-ghost', 'tokyo'].includes(family)) {
       body = S.cybercard(p, s, r, family, id);
     } else body = inner(family, p, s, r);

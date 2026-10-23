@@ -169,19 +169,30 @@ window.CC_SCENE = (() => {
       let motif = '';
       if (family === 'alien') {
         motif = `<g fill="none" stroke="${a}" filter="url(#gl${s})"><circle cx="80" cy="38" r="23"/><ellipse cx="80" cy="38" rx="38" ry="10" transform="rotate(-18 80 38)"/><circle cx="80" cy="38" r="5" stroke="${c(p, 'white')}"/></g><g fill="${a}">${Array.from({ length: 9 }, () => `<circle cx="${(r() * W).toFixed(1)}" cy="${(8 + r() * 26).toFixed(1)}" r="1"/>`).join('')}</g>`;
-      } else if (family === 'cyberdark' || family === 'cyberdark-grid' || family === 'futuristic') {
+      } else if (family === 'cyberdark') {
+        motif = `<g fill="none" stroke="${a}" filter="url(#gl${s})"><path d="M80 8L137 25L122 67L80 76L38 67L23 25Z"/><path d="M80 8V76M23 25L137 25M38 67L122 67M23 25L122 67M137 25L38 67"/></g><polygon points="80,22 96,38 80,54 64,38" fill="${b}" stroke="${c(p, 'white')}"/><circle cx="80" cy="38" r="4" fill="${a}"/>`;
+      } else if (family === 'cyberdark-grid') {
         motif = `<g stroke="${a}" fill="none" opacity=".8"><path d="M0 18H${W}M0 34H${W}M0 52H${W}M0 68H${W}"/><path d="M80 18L${W} 68M80 18L0 68M80 18V68"/><polygon points="80,20 103,38 80,56 57,38" stroke="${c(p, 'white')}"/></g><circle cx="80" cy="38" r="5" fill="${a}" filter="url(#gl${s})"/>`;
+      } else if (family === 'futuristic') {
+        motif = `<g fill="none" stroke="${a}" filter="url(#gl${s})"><ellipse cx="80" cy="38" rx="58" ry="18" transform="rotate(-18 80 38)"/><ellipse cx="80" cy="38" rx="42" ry="11" transform="rotate(32 80 38)"/><circle cx="80" cy="38" r="12" stroke="${c(p, 'white')}"/></g><circle cx="80" cy="38" r="5" fill="${a}"/><path d="M8 68H152" stroke="${c(p, 'white')}"/>`;
+      } else if (family === 'cyberdark-industrial' || family === 'synth-industrial') {
       } else if (family === 'cyberdark-industrial' || family === 'synth-industrial') {
         motif = `<g fill="${a}" opacity=".8">${Array.from({ length: 9 }, (_, i) => `<rect x="${10 + i * 17}" y="${58 - r() * 25}" width="9" height="${8 + r() * 25}"/>`).join('')}</g><g stroke="${c(p, 'white')}" fill="none"><path d="M0 58H${W}"/><circle cx="80" cy="33" r="15"/><path d="M80 18V48M65 33H95"/></g>`;
-      } else if (family === 'cyberdark-ops' || family === 'night-ops') {
+      } else if (family === 'cyberdark-ops') {
         motif = `<g fill="none" stroke="${a}" filter="url(#gl${s})"><circle cx="80" cy="38" r="24"/><circle cx="80" cy="38" r="11" stroke-dasharray="3 2"/><path d="M80 7V69M48 38H112M58 16L102 60M102 16L58 60"/></g><path d="M80 38L108 23" stroke="${c(p, 'white')}" stroke-width="2"/><circle cx="80" cy="38" r="3" fill="${a}"/>`;
+      } else if (family === 'night-ops') {
+        motif = `<rect x="15" y="12" width="130" height="54" fill="${b}" stroke="${a}"/><path d="M80 39L121 22A45 45 0 0 1 80 64A45 45 0 0 1 39 22Z" fill="none" stroke="${a}"/><path d="M80 39L121 22M80 39V13M80 39H36" stroke="${c(p, 'white')}"/><circle cx="80" cy="39" r="4" fill="${a}" filter="url(#gl${s})"/><path d="M22 20H48M112 58H138" stroke="${c(p, 'white')}"/>`;
       } else if (family === 'cyborg') {
         motif = `<path d="M54 63V30Q54 12 80 12T106 30V63" fill="${b}" stroke="${a}"/><path d="M80 14V62M57 37H103" stroke="${c(p, 'white')}"/><g fill="${a}"><rect x="63" y="29" width="10" height="4"/><rect x="87" y="29" width="10" height="4"/><circle cx="68" cy="31" r="2"/><circle cx="92" cy="31" r="2"/></g><path d="M64 48H96M70 54H90" stroke="${a}" stroke-width="2"/>`;
       } else if (family === 'dark-futurism') {
         motif = `<g fill="${b}" stroke="${a}"><path d="M14 68L25 14H44L51 68Z"/><path d="M58 68L68 7H91L101 68Z"/><path d="M105 68L116 22H139L151 68Z"/></g><path d="M0 69H${W}" stroke="${c(p, 'white')}"/><circle cx="80" cy="24" r="3" fill="${a}"/>`;
-      } else if (family === 'dark-skylines' || family === 'signal-cities' || family === 'tokyo') {
+      } else if (family === 'dark-skylines') {
         const buildings = Array.from({ length: 12 }, (_, i) => { const x = i * 14, h = 16 + r() * 35; return `<rect x="${x}" y="${68 - h}" width="11" height="${h}" fill="${b}" stroke="${a}" stroke-width=".5"/><path d="M${x + 3} ${72 - h}v${h - 6}M${x + 7} ${72 - h}v${h - 6}" stroke="${a}" stroke-width="1"/>`; }).join('');
         motif = `<g>${buildings}</g><path d="M0 69H${W}" stroke="${c(p, 'white')}"/><path d="M80 68V15M70 23H90" stroke="${a}" filter="url(#gl${s})"/><circle cx="80" cy="15" r="3" fill="${a}"/>`;
+      } else if (family === 'signal-cities') {
+        motif = `<g fill="${b}" stroke="${a}"><path d="M20 68L31 42L42 68Z"/><path d="M58 68L72 25L86 68Z"/><path d="M103 68L116 35L129 68Z"/></g><g fill="none" stroke="${a}" filter="url(#gl${s})"><path d="M72 25Q72 8 110 12T145 30"/><path d="M72 25Q72 4 33 16T8 36"/></g><circle cx="72" cy="25" r="3" fill="${c(p, 'white')}"/>`;
+      } else if (family === 'tokyo') {
+        motif = `<g fill="${b}" stroke="${a}"><rect x="12" y="20" width="34" height="42"/><rect x="54" y="12" width="38" height="50"/><rect x="100" y="25" width="48" height="37"/></g><g fill="${a}"><rect x="17" y="27" width="24" height="7"/><rect x="59" y="20" width="28" height="9"/><rect x="105" y="33" width="36" height="8"/></g><path d="M0 68H${W}M18 68L80 45L144 68" stroke="${c(p, 'white')}"/><circle cx="80" cy="8" r="4" fill="${a}" filter="url(#gl${s})"/>`;
       } else if (family === 'dystopian-frontier') {
         motif = `<circle cx="108" cy="30" r="17" fill="${a}" opacity=".7" filter="url(#gl${s})"/><path d="M0 64L22 42L38 58L61 34L83 62L106 47L127 60L151 38L${W} 62V70H0Z" fill="${b}" stroke="${a}"/><path d="M0 72H${W}M18 72l10-8M132 72l-8-10" stroke="${c(p, 'white')}"/>`;
       } else if (family === 'neon-noir') {

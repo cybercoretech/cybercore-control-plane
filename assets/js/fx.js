@@ -235,6 +235,59 @@
   const statDialogTitle = $('#statDialogTitle');
   const statDialogKicker = $('#statDialogKicker');
   const statDialogBody = $('#statDialogBody');
+  const escapeHtml = value => String(value).replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
+  const familyLabel = family => family.replaceAll('-', ' ').toUpperCase();
+  const slotInfo = [
+    ['bg', 'BACKGROUND', 'The base field behind every surface.'],
+    ['white', 'TEXT', 'Primary readable foreground and high-contrast labels.'],
+    ['panel', 'PANEL', 'Raised surfaces, cards, dialogs, and contained modules.'],
+    ['line', 'LINE', 'Borders, dividers, grids, and structural guides.'],
+    ['muted', 'MUTED', 'Secondary copy, metadata, and quiet interface signals.'],
+    ['acid_green', 'ACID GREEN', 'Positive status, active systems, and live indicators.'],
+    ['hot_pink', 'HOT PINK', 'Primary Cybercore energy, emphasis, and action.'],
+    ['purple', 'PURPLE', 'Depth, secondary glow, and spectral transitions.'],
+    ['cyan', 'CYAN', 'Links, focus states, telemetry, and navigation.'],
+    ['orange', 'ORANGE', 'Warnings, heat, and high-priority system activity.'],
+    ['red', 'RED', 'Critical states, alerts, and destructive signals.']
+  ];
+  const runtimeInfo = [
+    ['CONTROL PLANE', 'The local-first visual control surface for browsing, previewing, and selecting every registered theme.', '#matrix'],
+    ['WEB KIT', 'The standalone browser distribution for tokens, components, effects, and governed theme surfaces.', 'https://cybercoretech.github.io/cybercore-web-kit/'],
+    ['RUST TOOLING', 'The Cybercore command-line and crate surfaces that consume the same palette contract.', 'https://crates.io/crates/cybercore'],
+    ['PAGES SURFACES', 'The public Cybercore Pages sites that publish registry-backed themes and system documentation.', 'https://cybercoretech.github.io/']
+  ];
+  function explorerShell(intro, content) {
+    return `<p>${intro}</p>${content}<div class="stat-dialog-links">${statInfo[activeStat].links.map(([label, href]) => `<a href="${href}" ${href.startsWith('http') ? 'target="_blank" rel="noreferrer"' : ''}>${label} ↗</a>`).join('')}</div>`;
+  }
+  let activeStat = '';
+  function renderThemes() {
+    const registry = window.CC?.registry;
+    if (!registry) return '<p>Registry is still synchronizing. Reopen this panel in a moment.</p>';
+    const sourceNames = Object.values(registry.families).flat();
+    const groups = [['all', [...sourceNames, ...registry.mashups.map(m => m.id)]], ['mashup', registry.mashups.map(m => m.id)], ...Object.entries(registry.families)];
+    const tabs = groups.map(([family, names], i) => `<button type="button" class="stat-explorer-tab${i === 0 ? ' is-active' : ''}" data-explorer-tab="${escapeHtml(family)}">${escapeHtml(family === 'all' ? 'ALL THEMES' : family === 'mashup' ? 'MASHUPS' : familyLabel(family))}<b>${names.length}</b></button>`).join('');
+    const panels = groups.map(([family, names], i) => `<section class="stat-explorer-panel${i === 0 ? ' is-active' : ''}" data-explorer-panel="${escapeHtml(family)}"><div class="stat-theme-grid">${names.map(name => `<span class="stat-theme-item">${escapeHtml(name.replaceAll('-', ' ').toUpperCase())}</span>`).join('')}</div></section>`).join('');
+    return explorerShell('The complete live inventory is grouped by registry family. Select a tab to scan every source palette and signature mashup without leaving the Control Plane.', `<div class="stat-explorer-tabs">${tabs}</div>${panels}`);
+  }
+  function renderFamilies() {
+    const registry = window.CC?.registry;
+    if (!registry) return '<p>Registry is still synchronizing. Reopen this panel in a moment.</p>';
+    const items = Object.entries(registry.families).map(([family, names]) => `<article class="stat-family-item"><div><b>${escapeHtml(familyLabel(family))}</b><span>${names.length} THEMES</span></div><p>${escapeHtml(family.replaceAll('-', ' '))} visual language with a curated twelve-palette path in the canonical registry.</p></article>`).join('');
+    return explorerShell('Every canonical family is listed below with its live palette count and registry identity.', `<div class="stat-family-grid">${items}</div>`);
+  }
+  function renderSlots() {
+    return explorerShell('The palette contract is the shared interface between every theme, renderer, runtime, and published surface.', `<div class="stat-slot-grid">${slotInfo.map(([key, label, description], i) => `<article class="stat-slot-item"><b>${String(i + 1).padStart(2, '0')} / ${label}</b><code>--${key.replace('_', '-')}</code><p>${description}</p></article>`).join('')}</div>`);
+  }
+  function renderRuntimes() {
+    return explorerShell('These four runtime surfaces consume the same governed palette contract while serving different parts of the Cybercore ecosystem.', `<div class="stat-runtime-grid">${runtimeInfo.map(([label, description, href]) => `<article class="stat-runtime-item"><b>${label}</b><p>${description}</p><a href="${href}" ${href.startsWith('http') ? 'target="_blank" rel="noreferrer"' : ''}>OPEN SURFACE ↗</a></article>`).join('')}</div>`);
+  }
+  function wireThemeExplorer() {
+    $$('.stat-explorer-tab').forEach(tab => tab.addEventListener('click', () => {
+      const family = tab.dataset.explorerTab;
+      $$('.stat-explorer-tab').forEach(item => item.classList.toggle('is-active', item === tab));
+      $$('.stat-explorer-panel').forEach(panel => panel.classList.toggle('is-active', panel.dataset.explorerPanel === family));
+    }));
+  }
   const statInfo = {
     themes: {
       title: 'THEME INVENTORY',
@@ -259,9 +312,13 @@
   };
   function openStat(key) {
     const info = statInfo[key]; if (!info || !statDialog) return;
+    activeStat = key;
     statDialogTitle.textContent = info.title;
     statDialogKicker.textContent = `CYBERGRID / ${key.toUpperCase()}`;
-    statDialogBody.innerHTML = `<p>${info.body}</p><div class="stat-dialog-links">${info.links.map(([label, href]) => `<a href="${href}" ${href.startsWith('http') ? 'target="_blank" rel="noreferrer"' : ''}>${label} ↗</a>`).join('')}</div>`;
+    const content = key === 'themes' ? renderThemes() : key === 'families' ? renderFamilies() : key === 'slots' ? renderSlots() : renderRuntimes();
+    statDialogBody.innerHTML = content;
+    statDialog.classList.toggle('is-explorer', key === 'themes' || key === 'families' || key === 'slots' || key === 'runtimes');
+    if (key === 'themes') wireThemeExplorer();
     statDialog.showModal();
   }
   $$('.stat-card').forEach(card => card.addEventListener('click', () => openStat(card.dataset.stat)));

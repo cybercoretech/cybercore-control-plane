@@ -406,6 +406,16 @@
     updateLab(); renderCards(); preloadAll();
   }
 
-  window.CC = { apply, randomTheme, toast, get palette() { return currentPalette; }, get id() { return current; } };
+  window.CC = {
+    apply, randomTheme, toast,
+    get palette() { return currentPalette; },
+    get id() { return current; },
+    get registry() {
+      return {
+        families: Object.fromEntries(Object.entries(families).map(([family, names]) => [family, [...names]])),
+        mashups: SITE.mashups.map(m => ({ ...m }))
+      };
+    }
+  };
   boot();
 })();

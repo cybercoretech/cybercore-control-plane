@@ -231,6 +231,43 @@
   const co = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { countUp(e.target); co.unobserve(e.target); } }));
   $$('[data-count]').forEach(el => co.observe(el));
 
+  const statDialog = $('#statDialog');
+  const statDialogTitle = $('#statDialogTitle');
+  const statDialogKicker = $('#statDialogKicker');
+  const statDialogBody = $('#statDialogBody');
+  const statInfo = {
+    themes: {
+      title: 'THEME INVENTORY',
+      body: 'The live total combines every source palette from the canonical Cybergrid registry with the signature mashups defined by this Control Plane.',
+      links: [['OPEN THEME MATRIX', '#matrix'], ['VIEW REGISTRY', 'https://cybercoretech.github.io/data/cybergrid.json']]
+    },
+    families: {
+      title: 'FAMILY SIGNALS',
+      body: 'Each family is a curated visual language with its own card treatment, palette set, and registry path. Family counts update from the live registry.',
+      links: [['OPEN FAMILY MATRIX', '#matrix'], ['REGISTRY SCHEMA', 'https://github.com/cybercoretech/cybercoretech.github.io/blob/main/data/cybergrid.json']]
+    },
+    slots: {
+      title: 'PALETTE CONTRACT',
+      body: 'Every palette uses eleven canonical slots: background, text, panel, line, muted, acid green, hot pink, purple, cyan, orange, and red.',
+      links: [['OPEN THEME STUDIO', '#studio'], ['WEB KIT INSTALL', 'https://cybercoretech.github.io/cybercore-web-kit/']]
+    },
+    runtimes: {
+      title: 'RUNTIME SURFACES',
+      body: 'Cybercore themes can travel through the Control Plane, the Web Kit, Rust tooling, and the public Pages surfaces without changing the palette contract.',
+      links: [['INSTALL GUIDE', '#install'], ['WEB KIT REPOSITORY', 'https://github.com/cybercoretech/cybercore-web-kit']]
+    }
+  };
+  function openStat(key) {
+    const info = statInfo[key]; if (!info || !statDialog) return;
+    statDialogTitle.textContent = info.title;
+    statDialogKicker.textContent = `CYBERGRID / ${key.toUpperCase()}`;
+    statDialogBody.innerHTML = `<p>${info.body}</p><div class="stat-dialog-links">${info.links.map(([label, href]) => `<a href="${href}" ${href.startsWith('http') ? 'target="_blank" rel="noreferrer"' : ''}>${label} ↗</a>`).join('')}</div>`;
+    statDialog.showModal();
+  }
+  $$('.stat-card').forEach(card => card.addEventListener('click', () => openStat(card.dataset.stat)));
+  $('[data-stat-close]')?.addEventListener('click', () => statDialog?.close());
+  statDialog?.addEventListener('click', e => { if (e.target === statDialog) statDialog.close(); });
+
   /* ---------- rotator ---------- */
   (function rotator() {
     const el = $('#rotator'); if (!el || still) return;

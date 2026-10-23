@@ -23,19 +23,29 @@ window.CC_SCENE = (() => {
   const S = {
     cybercard(p, s, r, family, id) {
       const profiles = {
+        'cybercore-tech': ['CYBERCORE TECH', 'GOVERNED SYSTEM', 'acid_green', 'cyan'],
         alien: ['ALIEN SIGNAL', 'EXTRATERRESTRIAL RELAY', 'purple', 'cyan'],
         cyberdark: ['CYBERDARK', 'NOCTURNAL SYSTEM', 'cyan', 'purple'],
         'cyberdark-grid': ['GRID MATRIX', 'PRECISION ARCHITECTURE', 'cyan', 'white'],
         'cyberdark-industrial': ['INDUSTRIAL CORE', 'MACHINE TELEMETRY', 'orange', 'acid_green'],
+        'cyberdark-ops': ['CYBERDARK OPS', 'TACTICAL OVERWATCH', 'red', 'cyan'],
+        cyberdyne: ['CYBERDYNE', 'DEFENSE NETWORK', 'red', 'orange'],
+        cyberpunk: ['CYBERPUNK', 'NEON UNDERCITY', 'hot_pink', 'cyan'],
         cyborg: ['CYBORG LINK', 'AUGMENTED INTERFACE', 'acid_green', 'cyan'],
         'dark-futurism': ['DARK FUTURISM', 'MONOLITH PROTOCOL', 'purple', 'white'],
         'dark-skylines': ['DARK SKYLINES', 'METROPOLIS AFTER DARK', 'hot_pink', 'cyan'],
+        default: ['CLASSICS', 'CORE WORKSPACE', 'cyan', 'purple'],
         'dystopian-frontier': ['FRONTIER ZONE', 'PERIMETER SURVIVOR', 'orange', 'acid_green'],
+        dystopian: ['DYSTOPIAN', 'HAZARD TERRITORY', 'acid_green', 'orange'],
         futuristic: ['FUTURISTIC', 'ORBITAL SYSTEMS', 'cyan', 'white'],
+        'neon-noir': ['NEON NOIR', 'RAIN CITY NETWORK', 'hot_pink', 'cyan'],
+        neosynth: ['NEOSYNTH', 'SYNTHETIC SIGNAL', 'cyan', 'hot_pink'],
         'night-ops': ['NIGHT OPS', 'TACTICAL COMMAND', 'cyan', 'red'],
+        'omarchy-live': ['OMARCHY LIVE', 'DESKTOP SURFACE', 'white', 'hot_pink'],
         'plasma-core': ['PLASMA CORE', 'CONTAINED ENERGY', 'hot_pink', 'purple'],
         'signal-cities': ['SIGNAL CITIES', 'URBAN BROADCAST', 'cyan', 'orange'],
         'synth-industrial': ['SYNTH INDUSTRIAL', 'MECHANICAL RHYTHM', 'acid_green', 'orange'],
+        synthwave: ['SYNTHWAVE', 'RETROFUTURE SIGNAL', 'cyan', 'hot_pink'],
         'terminal-ghost': ['TERMINAL GHOST', 'RESIDUAL PROCESS', 'acid_green', 'purple'],
         tokyo: ['TOKYO CIRCUIT', 'ELECTRIC DISTRICT', 'hot_pink', 'cyan']
       };
@@ -44,15 +54,23 @@ window.CC_SCENE = (() => {
       const trace = (x, y, w, color, flip = false) => `<path d="M${x} ${y}h${w * .35}l${w * .08} ${flip ? -5 : 5}h${w * .32}l${w * .08} ${flip ? 5 : -5}h${w * .17}" fill="none" stroke="${c(p, color)}" stroke-width=".65" opacity=".9"/><circle cx="${x + w}" cy="${y}" r="1.6" fill="${c(p, color)}"/>`;
       let motif = '';
       if (family === 'alien') motif = `<ellipse cx="119" cy="36" rx="20" ry="8" fill="none" stroke="${c(p, primary)}" stroke-width="2"/><ellipse cx="119" cy="36" rx="10" ry="20" fill="none" stroke="${c(p, secondary)}" stroke-width="1.2" transform="rotate(-25 119 36)"/><circle cx="119" cy="36" r="4" fill="${c(p, primary)}"/>`;
+      else if (family === 'cybercore-tech') motif = `<polygon points="119,15 138,26 138,47 119,58 100,47 100,26" fill="${c(p, 'panel')}" stroke="${c(p, primary)}" stroke-width="2"/><path d="M119 20v33M105 28l28 17M133 28l-28 17" stroke="${c(p, secondary)}"/><circle cx="119" cy="36" r="5" fill="${c(p, primary)}"/>`;
       else if (family === 'cyberdark' || family === 'cyberdark-grid') motif = `<path d="M100 20h33l10 10v19l-10 10h-33L90 49V30z" fill="${c(p, 'panel')}" stroke="${c(p, primary)}"/><path d="M101 27h26M101 33h20M101 39h28M101 45h16" stroke="${c(p, secondary)}" stroke-width="1.6"/><circle cx="137" cy="25" r="2.5" fill="${c(p, primary)}"/>`;
       else if (family === 'cyberdark-industrial' || family === 'synth-industrial') motif = `<g fill="${c(p, primary)}">${[0,1,2,3,4].map(i => `<rect x="${99 + i * 8}" y="${57 - [12,25,18,31,21][i]}" width="5" height="${[12,25,18,31,21][i]}"/>`).join('')}</g><path d="M98 59h43" stroke="${c(p, secondary)}" stroke-width="1.2"/><circle cx="119" cy="25" r="12" fill="none" stroke="${c(p, secondary)}" stroke-width="2"/><path d="M119 13v24M107 25h24" stroke="${c(p, primary)}"/>`;
       else if (family === 'cyborg') motif = `<path d="M102 52V29q0-13 17-13t17 13v23" fill="${c(p, 'panel')}" stroke="${c(p, primary)}" stroke-width="1.5"/><path d="M119 17v36M104 34h30" stroke="${c(p, secondary)}"/><rect x="108" y="29" width="7" height="4" fill="${c(p, primary)}"/><rect x="123" y="29" width="7" height="4" fill="${c(p, primary)}"/><path d="M108 43h22" stroke="${c(p, primary)}" stroke-width="2"/>`;
+      else if (family === 'cyberdyne') motif = `<circle cx="119" cy="36" r="22" fill="${c(p, 'panel')}" stroke="${c(p, primary)}" stroke-width="2"/><circle cx="119" cy="36" r="13" fill="none" stroke="${c(p, secondary)}" stroke-dasharray="3 2"/><path d="M119 10v13M119 49v13M93 36h13M132 36h13" stroke="${c(p, primary)}" stroke-width="2"/><circle cx="119" cy="36" r="4" fill="${c(p, primary)}"/>`;
+      else if (family === 'cyberpunk' || family === 'neon-noir') motif = `<g fill="${c(p, 'panel')}" stroke="${c(p, primary)}">${[0,1,2,3].map(i => `<rect x="${99 + i * 11}" y="${54 - [18,31,24,38][i]}" width="8" height="${[18,31,24,38][i]}"/>`).join('')}</g><path d="M100 29h13M124 23h12M102 39h10" stroke="${c(p, secondary)}" stroke-width="2"/><circle cx="137" cy="17" r="3" fill="${c(p, primary)}"/>`;
       else if (family === 'dark-futurism') motif = `<path d="M99 58l8-34h10l5 34zM122 58l6-43h12l7 43z" fill="${c(p, 'panel')}" stroke="${c(p, primary)}"/><path d="M103 48h8M126 38h14M126 44h10" stroke="${c(p, secondary)}" stroke-width="1.4"/><circle cx="133" cy="20" r="3" fill="${c(p, primary)}"/>`;
       else if (family === 'dark-skylines' || family === 'signal-cities') motif = `<g fill="${c(p, 'panel')}" stroke="${c(p, primary)}">${[0,1,2,3,4].map(i => `<rect x="${98 + i * 9}" y="${55 - [22,35,27,42,18][i]}" width="7" height="${[22,35,27,42,18][i]}"/>`).join('')}</g><path d="M98 58h44M119 14v26M113 20h12" stroke="${c(p, secondary)}" stroke-width="1.3"/><circle cx="119" cy="14" r="2.5" fill="${c(p, primary)}"/>`;
+      else if (family === 'default') motif = `<rect x="98" y="17" width="44" height="39" fill="${c(p, 'panel')}" stroke="${c(p, primary)}"/><path d="M104 27h9l4 4-4 4h-9M120 35h16M104 44h29M104 49h19" stroke="${c(p, secondary)}" stroke-width="1.5"/><circle cx="104" cy="21" r="2" fill="${c(p, primary)}"/>`;
       else if (family === 'dystopian-frontier') motif = `<circle cx="127" cy="25" r="12" fill="${c(p, primary)}" opacity=".75"/><path d="M98 58l12-19 8 10 10-18 15 27z" fill="${c(p, 'panel')}" stroke="${c(p, secondary)}"/><path d="M98 61h45M103 54h7M133 49h7" stroke="${c(p, primary)}" stroke-width="1.4"/>`;
+      else if (family === 'dystopian') motif = `<path d="M98 56h44M101 56V25h11v31M116 56V17h12v39M133 56V30h8v26" fill="${c(p, 'panel')}" stroke="${c(p, primary)}"/><path d="M98 61h44M104 28h5M119 21h6M136 34h4" stroke="${c(p, secondary)}" stroke-width="1.5"/><path d="M98 65h44" stroke="${c(p, primary)}" stroke-width="3"/>`;
       else if (family === 'futuristic') motif = `<ellipse cx="120" cy="36" rx="27" ry="9" fill="none" stroke="${c(p, primary)}" stroke-width="2" transform="rotate(-20 120 36)"/><ellipse cx="120" cy="36" rx="20" ry="6" fill="none" stroke="${c(p, secondary)}" stroke-width="1.5" transform="rotate(27 120 36)"/><circle cx="120" cy="36" r="6" fill="${c(p, primary)}"/>`;
       else if (family === 'night-ops') motif = `<circle cx="120" cy="36" r="22" fill="${c(p, 'panel')}" stroke="${c(p, primary)}"/><path d="M120 36l17-13M120 14v44M98 36h44" stroke="${c(p, secondary)}" stroke-width="1"/><circle cx="120" cy="36" r="4" fill="${c(p, primary)}"/><path d="M101 20h10M130 52h10" stroke="${c(p, 'white')}"/>`;
+      else if (family === 'omarchy-live') motif = `<rect x="98" y="18" width="45" height="37" fill="${c(p, 'panel')}" stroke="${c(p, primary)}"/><rect x="103" y="24" width="11" height="25" fill="${c(p, primary)}" opacity=".75"/><path d="M119 26h18M119 33h13M119 40h20M119 47h10" stroke="${c(p, secondary)}" stroke-width="1.5"/><circle cx="108" cy="29" r="2" fill="${c(p, 'white')}"/>`;
       else if (family === 'plasma-core') motif = `<circle cx="120" cy="36" r="22" fill="${c(p, primary)}" opacity=".2" filter="url(#gl${s})"/><ellipse cx="120" cy="36" rx="26" ry="8" fill="none" stroke="${c(p, primary)}" stroke-width="2"/><ellipse cx="120" cy="36" rx="8" ry="25" fill="none" stroke="${c(p, secondary)}" stroke-width="1.5"/><circle cx="120" cy="36" r="6" fill="${c(p, primary)}"/>`;
+      else if (family === 'neosynth') motif = `<path d="M98 38q7-18 14 0t14 0t14 0" fill="none" stroke="${c(p, primary)}" stroke-width="2"/><path d="M98 46q7-12 14 0t14 0t14 0" fill="none" stroke="${c(p, secondary)}" stroke-width="1.5"/><g fill="${c(p, primary)}">${[8,19,13,26,16].map((h, i) => `<rect x="${99 + i * 8}" y="${59 - h}" width="5" height="${h}"/>`).join('')}</g>`;
+      else if (family === 'synthwave') motif = `<circle cx="120" cy="34" r="15" fill="${c(p, primary)}" opacity=".8"/><path d="M106 34h28M108 29h24M111 24h18M98 51h44M105 51l-7 10M115 51l-2 10M125 51l2 10M135 51l7 10" stroke="${c(p, secondary)}" stroke-width="1.3"/>`;
       else if (family === 'terminal-ghost') motif = `<rect x="97" y="18" width="46" height="36" fill="${c(p, 'panel')}" stroke="${c(p, primary)}"/><path d="M104 27l6 5-6 5M114 37h19M104 45l6 5-6 5M114 55h12" stroke="${c(p, secondary)}" stroke-width="1.6"/><circle cx="136" cy="24" r="2.5" fill="${c(p, primary)}"/>`;
       else if (family === 'tokyo') motif = `<rect x="98" y="24" width="42" height="30" fill="${c(p, 'panel')}" stroke="${c(p, primary)}"/><rect x="103" y="29" width="32" height="8" fill="${c(p, primary)}"/><path d="M103 43h29M103 49h19" stroke="${c(p, secondary)}" stroke-width="1.6"/><circle cx="139" cy="18" r="3" fill="${c(p, primary)}"/>`;
       else motif = `<rect x="101" y="20" width="38" height="32" fill="${c(p, 'panel')}" stroke="${c(p, primary)}"/><path d="M106 29h28M106 36h20M106 43h25" stroke="${c(p, secondary)}" stroke-width="1.4"/>`;
@@ -288,7 +306,7 @@ window.CC_SCENE = (() => {
         <g clip-path="url(#L${s})">${a}</g><g clip-path="url(#R${s})">${b}</g>
         <path d="M96 0L64 80" stroke="${c(p, 'white')}" stroke-width="1.6" filter="url(#gl${s})"/>
         <g transform="translate(80 40)"><rect x="-7" y="-7" width="14" height="14" transform="rotate(45)" fill="${c(p, 'bg')}" stroke="${c(p, 'hot_pink')}" stroke-width="1.2"/><path d="M-2.6-2.6l5.2 5.2M2.6-2.6l-5.2 5.2" stroke="${c(p, 'white')}" stroke-width="1.3"/></g>`;
-    } else if (['alien', 'cyberdark', 'cyberdark-grid', 'cyberdark-industrial', 'cyborg', 'dark-futurism', 'dark-skylines', 'dystopian-frontier', 'futuristic', 'night-ops', 'plasma-core', 'signal-cities', 'synth-industrial', 'terminal-ghost', 'tokyo'].includes(family)) {
+    } else if (['cybercore-tech', 'alien', 'cyberdark', 'cyberdark-grid', 'cyberdark-industrial', 'cyberdark-ops', 'cyberdyne', 'cyberpunk', 'cyborg', 'dark-futurism', 'dark-skylines', 'default', 'dystopian', 'dystopian-frontier', 'futuristic', 'neon-noir', 'neosynth', 'night-ops', 'omarchy-live', 'plasma-core', 'signal-cities', 'synth-industrial', 'synthwave', 'terminal-ghost', 'tokyo'].includes(family)) {
       body = S.cybercard(p, s, r, family, id);
     } else body = inner(family, p, s, r);
     return `<svg class="scene" viewBox="0 0 ${W} ${H}" aria-hidden="true">${body}</svg>`;

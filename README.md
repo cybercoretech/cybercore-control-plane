@@ -47,3 +47,16 @@ Pushes to `main` deploy the static site through `.github/workflows/pages.yml`. T
 ```text
 https://cybercoretech.github.io/cybercore-control-plane/
 ```
+
+The pack CLI currently exposes these installable registry IDs:
+
+```text
+cybercore.themes@1.0.0
+cybercore.effects@1.0.0
+cybercore.components@1.0.0
+cybercore.cyberdark-wallpapers@1.0.0
+cybercore.snippets@1.0.0
+cybercore.fonts@1.0.0
+cybercore.svg-assets@1.0.0
+cybercore.web-templates@1.0.0
+```

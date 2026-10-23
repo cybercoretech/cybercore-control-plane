@@ -539,6 +539,16 @@ curl localhost:8787/schema</code></pre>
         <a href="https://github.com/cybercoretech/cybercore/tree/feat/wasm-theme-core/packs/cybercore-snippets"><b>SNIPPETS</b><span>Installable code patterns with provenance.</span></a>
         <a href="https://github.com/cybercoretech/cybercore/tree/feat/wasm-theme-core/packs/cybercore-fonts"><b>FONTS</b><span>Typography resources and licensing metadata.</span></a>
       </div>
+      <div class="cp-install reveal">
+        <div><span class="cp-code-label">CONTROL PLANE / PACK INSTALLER</span><h3>Install a pack into the workspace.</h3><p>Pack selections stay project-local and reproducible. The installer writes manifests under <code>.cybercore/packs/</code> and exact versions to <code>.cybercore/packs.lock.json</code>.</p></div>
+        <pre><code><span class="c"># Install the companion CLI</span>
+cargo install --path crates/cybercore-pack
+
+cybercore-control pack search cyberdark
+cybercore-control pack install cybercore.themes@1.0.0
+cybercore-control pack list
+cybercore-control pack verify</code></pre>
+      </div>
     </section>
 
     <section class="section wrap control-plane-overview" id="roadmap">
@@ -561,7 +571,7 @@ curl localhost:8787/schema</code></pre>
       <div class="foot-row">
         <a class="brand" href="#top"><svg class="brand-mark"><use href="#mark"/></svg><span class="brand-name">CYBERCORE<small>MIT · Copyright (c) 2026 Cybercore Tech</small></span></a>
         <p class="keys"><kbd>T</kbd> themes <kbd>R</kbd> random <kbd>[</kbd><kbd>]</kbd> cycle <kbd>↑↑↓↓←→←→BA</kbd> overdrive</p>
-        <nav class="foot-links"><a href="https://cybercoretech.github.io/">CYBERCORE TECH</a><a href="https://cybercoretech.net/">CYBERCORETECH.NET</a><a href="https://github.com/cybercoretech/cybercore-control-plane">CONTROL PLANE</a><a href="https://docs.rs/cybercore-core">DOCS.RS</a></nav>
+        <nav class="foot-links"><a href="https://cybercoretech.github.io/">CYBERCORE TECH</a><a href="https://cybercoretech.net/">CYBERCORETECH.NET</a><a href="https://github.com/cybercoretech/cybercore-packs">PACKS</a><a href="https://github.com/cybercoretech/cybercore-control-plane">CONTROL PLANE</a><a href="https://docs.rs/cybercore-core">DOCS.RS</a></nav>
       </div>
     </div>
   </footer>

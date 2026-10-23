@@ -638,6 +638,7 @@ html.overdrive .glitch::before, html.overdrive .glitch::after { animation-durati
 
 /* ═════════ responsive ═════════ */
 .studio-shots { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(250px, .65fr); gap: 1rem; align-items: start; }
+.studio-shots-single { grid-template-columns: 1fr; }
 .studio-shot { min-width: 0; margin: 0; overflow: hidden; border: 1px solid var(--line); background: color-mix(in srgb, var(--panel) 88%, var(--bg)); box-shadow: 0 1rem 2.5rem color-mix(in srgb, var(--bg) 65%, transparent); }
 .studio-shot a { display: block; }
 .studio-shot img { display: block; width: 100%; height: auto; }

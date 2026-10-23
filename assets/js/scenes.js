@@ -175,9 +175,11 @@ window.CC_SCENE = (() => {
         motif = `<g stroke="${a}" fill="none" opacity=".8"><path d="M0 18H${W}M0 34H${W}M0 52H${W}M0 68H${W}"/><path d="M80 18L${W} 68M80 18L0 68M80 18V68"/><polygon points="80,20 103,38 80,56 57,38" stroke="${c(p, 'white')}"/></g><circle cx="80" cy="38" r="5" fill="${a}" filter="url(#gl${s})"/>`;
       } else if (family === 'futuristic') {
         motif = `<g fill="none" stroke="${a}" filter="url(#gl${s})"><ellipse cx="80" cy="38" rx="58" ry="18" transform="rotate(-18 80 38)"/><ellipse cx="80" cy="38" rx="42" ry="11" transform="rotate(32 80 38)"/><circle cx="80" cy="38" r="12" stroke="${c(p, 'white')}"/></g><circle cx="80" cy="38" r="5" fill="${a}"/><path d="M8 68H152" stroke="${c(p, 'white')}"/>`;
-      } else if (family === 'cyberdark-industrial' || family === 'synth-industrial') {
-      } else if (family === 'cyberdark-industrial' || family === 'synth-industrial') {
+      } else if (family === 'cyberdark-industrial') {
         motif = `<g fill="${a}" opacity=".8">${Array.from({ length: 9 }, (_, i) => `<rect x="${10 + i * 17}" y="${58 - r() * 25}" width="9" height="${8 + r() * 25}"/>`).join('')}</g><g stroke="${c(p, 'white')}" fill="none"><path d="M0 58H${W}"/><circle cx="80" cy="33" r="15"/><path d="M80 18V48M65 33H95"/></g>`;
+      } else if (family === 'synth-industrial') {
+        const wave = Array.from({ length: 17 }, (_, i) => `${i * 10},${38 + Math.sin(i * .9 + r()) * 13}`).join(' ');
+        motif = `<polyline points="${wave}" fill="none" stroke="${a}" stroke-width="2" filter="url(#gl${s})"/><g fill="${c(p, 'white')}" opacity=".8">${Array.from({ length: 12 }, (_, i) => `<rect x="${8 + i * 12}" y="${60 - (i % 4) * 7}" width="6" height="${8 + (i % 4) * 7}"/>`).join('')}</g><circle cx="80" cy="38" r="14" fill="none" stroke="${c(p, 'orange')}" stroke-width="3"/><path d="M80 24V52M66 38H94" stroke="${c(p, 'orange')}"/>`;
       } else if (family === 'cyberdark-ops') {
         motif = `<g fill="none" stroke="${a}" filter="url(#gl${s})"><circle cx="80" cy="38" r="24"/><circle cx="80" cy="38" r="11" stroke-dasharray="3 2"/><path d="M80 7V69M48 38H112M58 16L102 60M102 16L58 60"/></g><path d="M80 38L108 23" stroke="${c(p, 'white')}" stroke-width="2"/><circle cx="80" cy="38" r="3" fill="${a}"/>`;
       } else if (family === 'night-ops') {

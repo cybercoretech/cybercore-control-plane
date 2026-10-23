@@ -1,4 +1,4 @@
-# Install the Cybercore theme checker
+# 🚀 Install the Cybercore theme checker
 
 Cybercore 0.8 publishes `cybercore-theme`, a command-line tool for checking
 theme quality, compatibility, and portable theme packs. Install Rust and Cargo

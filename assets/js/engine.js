@@ -407,7 +407,7 @@
   }
 
   window.CC = {
-    apply, randomTheme, toast,
+    apply, randomTheme, toast, resolve,
     get palette() { return currentPalette; },
     get id() { return current; },
     get registry() {

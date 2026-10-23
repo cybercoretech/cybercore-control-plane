@@ -268,8 +268,9 @@
     const familyFor = name => name.startsWith('cc-') ? 'mashup' : Object.keys(registry.families).find(family => registry.families[family].includes(name)) || 'mashup';
     const colorFor = family => registry.colors[family] || '#ff2bd6';
     const tabs = groups.map(([family, names]) => `<button type="button" class="stat-explorer-tab${family === activeFamily ? ' is-active' : ''}" data-explorer-tab="${escapeHtml(family)}">${escapeHtml(family === 'all' ? 'ALL THEMES' : family === 'mashup' ? 'MASHUPS' : familyLabel(family))}<b>${names.length}</b></button>`).join('');
-    const panels = groups.map(([family, names]) => `<section class="stat-explorer-panel${family === activeFamily ? ' is-active' : ''}" data-explorer-panel="${escapeHtml(family)}"><div class="stat-theme-grid">${names.map(name => `<button type="button" class="stat-theme-item" data-theme-id="${escapeHtml(name)}" style="--item-accent:${colorFor(family === 'all' ? familyFor(name) : family)}">${escapeHtml(name.replaceAll('-', ' ').toUpperCase())}</button>`).join('')}</div></section>`).join('');
-    return explorerShell('The complete live inventory is grouped by registry family. Select a tab to scan every source palette and signature mashup without leaving the Control Plane.', `<div class="stat-explorer-tabs">${tabs}</div>${panels}`);
+    const panels = groups.map(([family, names]) => `<section class="stat-explorer-panel${family === activeFamily ? ' is-active' : ''}" data-explorer-panel="${escapeHtml(family)}"><div class="stat-theme-grid${family === 'all' ? ' is-compact' : ' is-cards'}">${names.map(name => `<button type="button" class="stat-theme-item" data-theme-id="${escapeHtml(name)}" data-theme-family="${escapeHtml(family === 'all' ? familyFor(name) : family)}" style="--item-accent:${colorFor(family === 'all' ? familyFor(name) : family)}"><span class="stat-theme-art"></span><span class="stat-theme-label">${escapeHtml(name.replaceAll('-', ' ').toUpperCase())}</span></button>`).join('')}</div></section>`).join('');
+    const back = activeFamily !== 'all' ? '<button type="button" class="stat-explorer-back">← BACK TO FAMILIES</button>' : '';
+    return explorerShell('The complete live inventory is grouped by registry family. Select a tab to scan every source palette and signature mashup without leaving the Control Plane.', `${back}<div class="stat-explorer-tabs">${tabs}</div>${panels}`);
   }
   function renderFamilies() {
     const registry = window.CC?.registry;
@@ -283,16 +284,48 @@
   function renderRuntimes() {
     return explorerShell('These four runtime surfaces consume the same governed palette contract while serving different parts of the Cybercore ecosystem.', `<div class="stat-runtime-grid">${runtimeInfo.map(([label, description, href]) => `<article class="stat-runtime-item"><b>${label}</b><p>${description}</p><a href="${href}" ${href.startsWith('http') ? 'target="_blank" rel="noreferrer"' : ''}>OPEN SURFACE ↗</a></article>`).join('')}</div>`);
   }
+  function hydrateThemeCards(family) {
+    if (family === 'all') return;
+    const registry = window.CC?.registry;
+    const panel = document.querySelector(`.stat-explorer-panel[data-explorer-panel="${CSS.escape(family)}"]`);
+    if (!registry || !panel || !window.CC?.resolve || !window.CC_SCENE) return;
+    const mashups = Object.fromEntries(registry.mashups.map(m => [m.id, m]));
+    panel.querySelectorAll('.stat-theme-item').forEach(async item => {
+      try {
+        const id = item.dataset.themeId;
+        const p = await window.CC.resolve(id);
+        const m = mashups[id];
+        const familyName = item.dataset.themeFamily;
+        const blend = m ? { baseFamily: Object.keys(registry.families).find(name => registry.families[name].includes(m.base)), accentFamily: Object.keys(registry.families).find(name => registry.families[name].includes(m.accent)) } : null;
+        item.querySelector('.stat-theme-art').innerHTML = window.CC_SCENE(id, p, familyName, blend);
+        item.insertAdjacentHTML('beforeend', `<span class="stat-theme-meta">${escapeHtml(familyLabel(familyName))}<span class="stat-theme-swatches">${['acid_green', 'hot_pink', 'cyan', 'purple', 'orange'].map(slot => `<i style="background:#${p[slot]}"></i>`).join('')}</span></span>`);
+        item.classList.add('is-rendered');
+      } catch (error) {
+        console.warn('theme explorer card', item.dataset.themeId, error);
+      }
+    });
+  }
   function wireThemeExplorer() {
     $$('.stat-explorer-tab').forEach(tab => tab.addEventListener('click', () => {
       const family = tab.dataset.explorerTab;
       $$('.stat-explorer-tab').forEach(item => item.classList.toggle('is-active', item === tab));
       $$('.stat-explorer-panel').forEach(panel => panel.classList.toggle('is-active', panel.dataset.explorerPanel === family));
+      hydrateThemeCards(family);
     }));
     $$('.stat-theme-item').forEach(item => item.addEventListener('click', () => {
       window.CC?.apply(item.dataset.themeId);
       statDialog?.close();
     }));
+    $('.stat-explorer-back')?.addEventListener('click', showFamilies);
+    hydrateThemeCards(document.querySelector('.stat-explorer-tab.is-active')?.dataset.explorerTab || 'all');
+  }
+  function showFamilies() {
+    activeStat = 'families';
+    statDialogTitle.textContent = statInfo.families.title;
+    statDialogKicker.textContent = 'CYBERGRID / FAMILIES';
+    statDialogBody.innerHTML = renderFamilies();
+    statDialog.classList.add('is-explorer');
+    $$('.stat-family-item').forEach(item => item.addEventListener('click', () => showThemeFamily(item.dataset.familyOpen)));
   }
   function showThemeFamily(family = 'all') {
     activeStat = 'themes';

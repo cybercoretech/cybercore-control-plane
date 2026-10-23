@@ -1,0 +1,66 @@
+{
+  "schema_version": 1,
+  "updated_at": "2026-10-23",
+  "items": [
+    {
+      "date": "2026-10-23",
+      "type": "PACKS",
+      "tone": "cyan",
+      "title": "Pack installation is now available",
+      "summary": "The pack registry exposes official namespaces, manifests, lockfiles, and a companion CLI with Control Plane command spelling.",
+      "status": "LIVE",
+      "command": "cybercore-control pack install cybercore.themes@1.0.0",
+      "link": "https://github.com/cybercoretech/cybercore-packs"
+    },
+    {
+      "date": "2026-10-23",
+      "type": "WEB KIT",
+      "tone": "pink",
+      "title": "Standalone Web Kit distribution",
+      "summary": "Versioned browser assets, registry snapshots, install docs, compatibility notes, checksums, and a Pages showcase are available.",
+      "status": "LIVE",
+      "command": "npm install @cybercore/web-kit",
+      "link": "https://cybercoretech.github.io/cybercore-web-kit/"
+    },
+    {
+      "date": "2026-10-23",
+      "type": "CONTROL PLANE",
+      "tone": "acid",
+      "title": "Control Plane Pages surface launched",
+      "summary": "The public Control Plane documents governed resources, modding, crates, packs, Web Kit distribution, and the future pack network.",
+      "status": "LIVE",
+      "command": "python3 -m http.server 8000",
+      "link": "https://github.com/cybercoretech/cybercore-control-plane"
+    },
+    {
+      "date": "2026-10-23",
+      "type": "THEMES",
+      "tone": "purple",
+      "title": "Canonical theme registry remains at 254 themes",
+      "summary": "The shared registry continues to drive the Theme Studio, Control Plane, Web Kit snapshot, and Cybercore public surfaces.",
+      "status": "SYNCED",
+      "command": "theme chooser → 254 palettes",
+      "link": "https://cybercoretech.github.io/data/cybergrid.json"
+    },
+    {
+      "date": "2026-10-23",
+      "type": "COMPATIBILITY",
+      "tone": "orange",
+      "title": "Reduced-motion policy is carried through every surface",
+      "summary": "Web Kit effects provide static and reduced variants, while pack manifests record compatibility, provenance, and accessibility metadata.",
+      "status": "GUARDED",
+      "command": "window.SITE.web.motion = 'reduced'",
+      "link": "https://github.com/cybercoretech/cybercore-web-kit/blob/main/COMPATIBILITY.md"
+    },
+    {
+      "date": "2026-10-23",
+      "type": "NEXT",
+      "tone": "red",
+      "title": "Pack archives and checksum enforcement",
+      "summary": "The next registry milestone migrates real resource payloads into release archives with enforced SHA-256 verification and dependency resolution.",
+      "status": "IN PROGRESS",
+      "command": "cybercore-control pack verify",
+      "link": "https://github.com/cybercoretech/cybercore-packs"
+    }
+  ]
+}

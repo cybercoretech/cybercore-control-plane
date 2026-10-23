@@ -34,6 +34,7 @@
   <script src="assets/js/scenes.js" defer></script>
   <script src="assets/js/engine.js" defer></script>
   <script src="assets/js/fx.js" defer></script>
+  <script src="assets/js/updates.js" defer></script>
   <script type="module" src="https://cybercoretech.github.io/kit/contact.js"></script>
 </head>
 <body>
@@ -102,7 +103,7 @@
       <span class="brand-name">CYBERCORE<small>THEME SYSTEM / FRAMEWORK</small></span>
     </a>
     <nav class="nav" aria-label="Primary">
-      <a href="#contract">CONTRACT</a><a href="#matrix">MATRIX</a><a href="#lab">LAB</a><a href="#studio">STUDIO</a><a href="#pipeline">PIPELINE</a><a href="#tokens">TOKENS</a><a href="#grid">GRID</a><a href="#install">INSTALL</a>
+      <a href="#contract">CONTRACT</a><a href="#matrix">MATRIX</a><a href="#lab">LAB</a><a href="#studio">STUDIO</a><a href="#signal">📡 SIGNAL</a><a href="#pipeline">PIPELINE</a><a href="#tokens">TOKENS</a><a href="#grid">GRID</a><a href="#install">INSTALL</a>
     </nav>
     <div class="theme-picker" id="picker">
       <button class="theme-button" id="themeButton" type="button" aria-haspopup="listbox" aria-expanded="false" aria-controls="themeMenu" title="Theme (T)">
@@ -168,6 +169,15 @@
       <span>SCHEMA</span><i>◆</i><span>PALETTE</span><i>◆</i><span>DESIGN TOKENS</span><i>◆</i><span>CANONICAL PATHS</span><i>◆</i><span>SYNTHWAVE</span><i>◆</i><span>CYBERDYNE</span><i>◆</i><span>NEOSYNTH</span><i>◆</i><span>CYBERPUNK</span><i>◆</i><span>DYSTOPIAN</span><i>◆</i>
       <span>SCHEMA</span><i>◆</i><span>PALETTE</span><i>◆</i><span>DESIGN TOKENS</span><i>◆</i><span>CANONICAL PATHS</span><i>◆</i><span>SYNTHWAVE</span><i>◆</i><span>CYBERDYNE</span><i>◆</i><span>NEOSYNTH</span><i>◆</i><span>CYBERPUNK</span><i>◆</i><span>DYSTOPIAN</span><i>◆</i>
     </div></div>
+
+    <section class="section wrap signal-section" id="signal">
+      <div class="head reveal">
+        <div><p class="kicker">📡 SIGNAL / UPDATES</p><h2 class="scramble">What changed<br><em>in the grid.</em></h2></div>
+        <p>The Control Plane update feed tracks new releases, packs, themes, compatibility notes, security signals, and install paths. It is versioned in this repository and can later be generated from GitHub Releases.</p>
+      </div>
+      <div class="signal-toolbar reveal"><span id="signalStatus">SYNCING UPDATE FEED…</span><a href="data/updates.json">VIEW RAW FEED ↗</a></div>
+      <div class="signal-grid" id="updatesGrid" aria-live="polite"></div>
+    </section>
 
     <!-- ═══════════════ THEME STUDIO ═══════════════ -->
     <section class="section wrap" id="studio">

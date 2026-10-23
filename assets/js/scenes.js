@@ -144,6 +144,25 @@ window.CC_SCENE = (() => {
         <rect y="${H - 6}" width="${W}" height="6" fill="${c(p, 'purple')}" opacity=".8"/>`;
     },
 
+    generic(p, s, r) {
+      const points = Array.from({ length: 9 }, (_, i) => `${(r() * W).toFixed(1)},${(18 + r() * 48).toFixed(1)}`).join(' ');
+      const beams = Array.from({ length: 7 }, (_, i) => {
+        const x = 8 + i * 24 + r() * 12;
+        return `<path d="M80 38L${x.toFixed(1)} ${H}" stroke="${c(p, i % 2 ? 'cyan' : 'hot_pink')}" stroke-width=".7" opacity=".7"/>`;
+      }).join('');
+      const bars = Array.from({ length: 12 }, (_, i) => {
+        const h = 5 + r() * 24;
+        return `<rect x="${8 + i * 12}" y="${70 - h}" width="6" height="${h.toFixed(1)}" fill="${c(p, ['acid_green', 'purple', 'orange', 'cyan'][i % 4])}" opacity=".8"/>`;
+      }).join('');
+      return `<defs><linearGradient id="gn${s}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${c(p, 'bg')}"/><stop offset=".55" stop-color="${c(p, 'purple')}" stop-opacity=".55"/><stop offset="1" stop-color="${c(p, 'hot_pink')}" stop-opacity=".35"/></linearGradient>${glow(s)}</defs>
+        <rect width="${W}" height="${H}" fill="${c(p, 'bg')}"/><rect width="${W}" height="${H}" fill="url(#gn${s})"/>
+        <path d="M0 18H${W}M0 38H${W}M0 58H${W}" stroke="${c(p, 'line')}" stroke-width=".5"/>
+        <polyline points="${points}" fill="none" stroke="${c(p, 'white')}" stroke-width=".7" opacity=".65"/>
+        <g>${beams}</g><g>${bars}</g>
+        <polygon points="80,20 98,38 80,56 62,38" fill="${c(p, 'panel')}" stroke="${c(p, 'cyan')}" stroke-width="1" filter="url(#gl${s})"/>
+        <circle cx="80" cy="38" r="7" fill="none" stroke="${c(p, 'hot_pink')}" stroke-width="1.2"/><circle cx="80" cy="38" r="2" fill="${c(p, 'acid_green')}"/>`;
+    },
+
     'cybercore-tech'(p, s) {
       const cx = 80, cy = 40, R = 15, cols = ['cyan', 'acid_green', 'orange', 'red', 'hot_pink', 'purple'];
       const hex = (rad) => Array.from({ length: 6 }, (_, i) => { const a = Math.PI / 3 * i - Math.PI / 2; return `${(cx + rad * Math.cos(a)).toFixed(1)},${(cy + rad * Math.sin(a)).toFixed(1)}`; }).join(' ');
@@ -161,7 +180,7 @@ window.CC_SCENE = (() => {
     }
   };
 
-  function inner(family, p, s, r) { return (S[family] || S.synthwave)(p, s, r); }
+  function inner(family, p, s, r) { return (S[family] || S.generic)(p, s, r); }
 
   /* scene(id, palette, family, blend?) → <svg> string.
      blend = { baseFamily, accentFamily } for mashups. */

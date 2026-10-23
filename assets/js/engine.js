@@ -25,9 +25,10 @@
   const FALLBACK = { bg: '09080f', white: 'f0f0f2', acid_green: '39ff33', hot_pink: 'ff147f', purple: '8a22e2', cyan: '00e5ff', orange: 'ff9000', red: 'f1142d', panel: '16151f', line: '32303e', muted: '807f8b' };
   const LABELS = { mashup: 'SIGNATURE MASHUPS', 'cybercore-tech': 'CYBERCORE TECH / MASTER MIX', cyberdyne: 'CYBERDYNE', cyberpunk: 'CYBERPUNK', default: 'DEFAULT / CLASSICS', dystopian: 'DYSTOPIAN', neosynth: 'NEOSYNTH', synthwave: 'SYNTHWAVE' };
   const SHORT = { mashup: 'MASHUPS', 'cybercore-tech': 'MASTER', cyberdyne: 'CYBERDYNE', cyberpunk: 'CYBERPUNK', default: 'CLASSICS', dystopian: 'DYSTOPIAN', neosynth: 'NEOSYNTH', synthwave: 'SYNTHWAVE' };
+  const FAMILY_ICONS = new Set(['mashup', 'cybercore-tech', 'cyberdyne', 'cyberpunk', 'default', 'dystopian', 'neosynth', 'synthwave']);
   const $ = s => document.querySelector(s);
   const $$ = s => [...document.querySelectorAll(s)];
-  const display = s => s.replaceAll('-', ' ').toUpperCase();
+  const display = s => (s || 'unknown-family').replaceAll('-', ' ').toUpperCase();
   const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   let families = {};
@@ -47,7 +48,10 @@
   const blendOf = id => mashOf(id) || parseMix(id);
   const known = id => Boolean(id && (blendOf(id) || familyOf(id)));
   const labelOf = id => { const b = blendOf(id); return b ? b.label : display(id); };
-  const familyLabel = id => mashOf(id) ? 'SIGNATURE MASHUP' : parseMix(id) ? 'LAB MASHUP' : (LABELS[familyOf(id)] || '');
+  const familyName = family => LABELS[family] || display(family);
+  const familyShort = family => SHORT[family] || display(family);
+  const familyIcon = family => FAMILY_ICONS.has(family) ? family : 'mashup';
+  const familyLabel = id => mashOf(id) ? 'SIGNATURE MASHUP' : parseMix(id) ? 'LAB MASHUP' : familyName(familyOf(id));
 
   async function palette(name) {
     if (cache[name]) return cache[name];
@@ -152,7 +156,7 @@
       if (!items.length) return;
       const h = document.createElement('div');
       h.className = 'theme-group-label'; h.dataset.family = family;
-      h.innerHTML = `<svg aria-hidden="true"><use href="#fam-${family}"/></svg>${LABELS[family] || family.toUpperCase()}<em>${items.length}</em>`;
+      h.innerHTML = `<svg aria-hidden="true"><use href="#fam-${familyIcon(family)}"/></svg>${familyName(family)}<em>${items.length}</em>`;
       list.append(h);
       items.forEach((name, i) => {
         const b = document.createElement('button');
@@ -225,7 +229,7 @@
   function buildFamilies() {
     const el = $('#families'); if (!el) return;
     const fams = [['all', allNames()], ...groups()];
-    el.innerHTML = fams.map(([f, names]) => `<button class="fam" role="tab" data-family="${f}" aria-selected="${f === activeFamily}" style="${f === 'all' ? '--fa:var(--white)' : ''}"><svg aria-hidden="true"><use href="#fam-${f === 'all' ? 'mashup' : f}"/></svg>${f === 'all' ? 'ALL' : SHORT[f]}<em>${names.length}</em></button>`).join('');
+    el.innerHTML = fams.map(([f, names]) => `<button class="fam" role="tab" data-family="${f}" aria-selected="${f === activeFamily}" style="${f === 'all' ? '--fa:var(--white)' : ''}"><svg aria-hidden="true"><use href="#fam-${f === 'all' ? 'mashup' : familyIcon(f)}"/></svg>${f === 'all' ? 'ALL' : familyShort(f)}<em>${names.length}</em></button>`).join('');
     el.querySelectorAll('.fam').forEach(b => b.addEventListener('click', () => {
       activeFamily = b.dataset.family;
       el.querySelectorAll('.fam').forEach(x => x.setAttribute('aria-selected', String(x === b)));
@@ -245,7 +249,7 @@
     const pals = await Promise.all(names.map(n => resolve(n).catch(() => null)));
     el.innerHTML = names.map((n, i) => {
       const p = pals[i]; if (!p) return '';
-      const fam = mashOf(n) ? 'SIGNATURE MASHUP' : (LABELS[familyOf(n)] || '');
+      const fam = mashOf(n) ? 'SIGNATURE MASHUP' : familyName(familyOf(n));
       return `<button type="button" class="tcard" data-value="${n}" aria-pressed="${n === current}" style="${cardStyle(p)};--i:${i}">${scene(n, p)}
         <div class="t-meta"><div class="t-name">${labelOf(n)}</div><div class="t-dots">${NEON.map(k => `<i style="background:#${p[k]}"></i>`).join('')}</div><div class="t-fam">${fam}</div></div></button>`;
     }).join('');

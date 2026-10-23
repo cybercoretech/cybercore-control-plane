@@ -16,7 +16,7 @@ This repository contains the public documentation and showcase surface for the C
 python3 -m http.server 8000
 ```
 
-Open `http://127.0.0.1:8000/`. The theme engine uses the shared 254-theme registry and falls back to the embedded Cybercore palette when the registry is unavailable.
+Open `http://127.0.0.1:8000/`. The theme engine uses the shared 255-theme registry and falls back to the embedded Cybercore palette when the registry is unavailable.
 
 ## ✨ Pages deployment
 

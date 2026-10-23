@@ -24,8 +24,26 @@
         <div class="update-badges">${badgesFor(item).map(badge => `<span class="badge ${escapeHtml(item.tone || 'info')}">${escapeHtml(badge)}</span>`).join('')}</div>
       </div>
       <p class="update-detail-summary">${escapeHtml(item.summary)}</p>
-      <div class="update-detail-command"><span>COMMAND / PATH</span><code>${escapeHtml(item.command)}</code></div>
+      <div class="update-detail-command"><span>COMMAND / PATH</span><div class="update-command-line"><code>${escapeHtml(item.command)}</code><button type="button" class="copy-command" data-copy-command="${escapeHtml(item.command)}">COPY</button></div></div>
       <div class="stat-dialog-links">${linksFor(item).map(link => `<a href="${escapeHtml(link.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(link.label)} ↗</a>`).join('')}</div>`;
+    dialogBody.querySelector('[data-copy-command]')?.addEventListener('click', async event => {
+      const button = event.currentTarget;
+      const command = button.dataset.copyCommand;
+      try {
+        await navigator.clipboard.writeText(command);
+      } catch {
+        const input = document.createElement('textarea');
+        input.value = command;
+        input.style.position = 'fixed';
+        input.style.opacity = '0';
+        document.body.append(input);
+        input.select();
+        document.execCommand('copy');
+        input.remove();
+      }
+      button.textContent = 'COPIED';
+      window.setTimeout(() => { button.textContent = 'COPY'; }, 1400);
+    });
     dialog.showModal();
   };
 

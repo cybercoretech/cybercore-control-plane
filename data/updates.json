@@ -36,10 +36,10 @@
       "date": "2026-10-23",
       "type": "THEMES",
       "tone": "purple",
-      "title": "Canonical theme registry now has 255 themes",
+      "title": "Canonical theme registry now has 312 themes",
       "summary": "The shared registry continues to drive the Theme Studio, Control Plane, Web Kit snapshot, and Cybercore public surfaces.",
       "status": "SYNCED",
-      "command": "theme chooser → 255 palettes",
+      "command": "theme chooser → 312 palettes",
       "link": "https://cybercoretech.github.io/data/cybergrid.json"
     },
     {

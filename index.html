@@ -44,6 +44,7 @@
   <script src="assets/js/engine.js?v=0.9.9" defer></script>
   <script src="assets/js/fx.js?v=0.9.9" defer></script>
   <script src="assets/js/updates.js" defer></script>
+  <script src="assets/js/schema.js" defer></script>
   <script type="module" src="https://cybercoretech.github.io/kit/contact.js"></script>
 </head>
 <body>
@@ -179,6 +180,14 @@
         <p class="kicker" id="statDialogKicker">CYBERGRID / INFO</p>
         <h2 id="statDialogTitle">STAT SIGNAL</h2>
         <div id="statDialogBody"></div>
+      </div>
+    </dialog>
+    <dialog class="stat-dialog update-dialog" id="updateDialog" aria-labelledby="updateDialogTitle">
+      <div class="stat-dialog-shell">
+        <button class="stat-dialog-close" type="button" data-update-close aria-label="Close update details">×</button>
+        <p class="kicker" id="updateDialogKicker">CONTROL PLANE / UPDATE</p>
+        <h2 id="updateDialogTitle">UPDATE SIGNAL</h2>
+        <div id="updateDialogBody"></div>
       </div>
     </dialog>
 
@@ -318,6 +327,12 @@
         <div class="head reveal">
           <div><p class="kicker">04 / PIPELINE</p><h2 class="scramble">Edit the JSON.<br><em>Never hand-edit anywhere else.</em></h2></div>
           <p><code>schema/cybergrid.json</code> is the only place a colour or a path is written down. Four runtimes read it, and every downstream tool reads one of those.</p>
+        </div>
+        <div class="schema-status reveal" aria-live="polite">
+          <span class="badge info">LIVE SCHEMA</span>
+          <strong data-schema-version>CHECKING VERSION…</strong>
+          <span><b data-schema-families>—</b> families · <b data-schema-themes>—</b> source themes · updated <b data-schema-updated>—</b></span>
+          <a href="https://cybercoretech.github.io/data/cybergrid.json" target="_blank" rel="noopener noreferrer">OPEN CANONICAL JSON ↗</a>
         </div>
         <div class="flow reveal" id="flow">
           <svg viewBox="0 0 1100 420" class="flow-svg" role="img" aria-labelledby="flowTitle">

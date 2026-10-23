@@ -25,7 +25,36 @@
   const FALLBACK = { bg: '09080f', white: 'f0f0f2', acid_green: '39ff33', hot_pink: 'ff147f', purple: '8a22e2', cyan: '00e5ff', orange: 'ff9000', red: 'f1142d', panel: '16151f', line: '32303e', muted: '807f8b' };
   const LABELS = { mashup: 'SIGNATURE MASHUPS', 'cybercore-tech': 'CYBERCORE TECH / MASTER MIX', cyberdyne: 'CYBERDYNE', cyberpunk: 'CYBERPUNK', default: 'DEFAULT / CLASSICS', dystopian: 'DYSTOPIAN', neosynth: 'NEOSYNTH', synthwave: 'SYNTHWAVE' };
   const SHORT = { mashup: 'MASHUPS', 'cybercore-tech': 'MASTER', cyberdyne: 'CYBERDYNE', cyberpunk: 'CYBERPUNK', default: 'CLASSICS', dystopian: 'DYSTOPIAN', neosynth: 'NEOSYNTH', synthwave: 'SYNTHWAVE' };
-  const FAMILY_ICONS = new Set(['mashup', 'cybercore-tech', 'cyberdyne', 'cyberpunk', 'default', 'dystopian', 'neosynth', 'synthwave']);
+  const FAMILY_COLORS = {
+    alien: '#9b7cff', 'cybercore-tech': '#39ff33', cyberdark: '#00e5ff', 'cyberdark-grid': '#4cc9f0',
+    'cyberdark-industrial': '#ff9d3d', 'cyberdark-ops': '#ff334f', cyberdyne: '#ff1f3d', cyberpunk: '#ff0055',
+    cyborg: '#c6ff00', 'dark-futurism': '#bf8cff', 'dark-skylines': '#7c83ff', default: '#7dcfff',
+    dystopian: '#d4e157', 'dystopian-frontier': '#e58b45', futuristic: '#00ffc8', 'neon-noir': '#ff2bd6',
+    neosynth: '#00ff8c', 'night-ops': '#62a0ff', 'omarchy-live': '#f5c2e7', 'plasma-core': '#ff6bce',
+    'signal-cities': '#00f0ff', 'synth-industrial': '#a6e22e', synthwave: '#4cc9f0',
+    'terminal-ghost': '#9eff6e', tokyo: '#ff4fa3', mashup: '#ff2bd6'
+  };
+  const FAMILY_ICONS = {
+    alien: 'neosynth', 'cybercore-tech': 'cybercore-tech', cyberdark: 'cybercore-tech', 'cyberdark-grid': 'cybercore-tech',
+    'cyberdark-industrial': 'cyberdyne', 'cyberdark-ops': 'cyberdyne', cyberdyne: 'cyberdyne', cyberpunk: 'cyberpunk',
+    cyborg: 'cyberpunk', 'dark-futurism': 'dystopian', 'dark-skylines': 'cyberpunk', default: 'default',
+    dystopian: 'dystopian', 'dystopian-frontier': 'dystopian', futuristic: 'neosynth', 'neon-noir': 'cyberpunk',
+    neosynth: 'neosynth', 'night-ops': 'cyberdyne', 'omarchy-live': 'default', 'plasma-core': 'neosynth',
+    'signal-cities': 'cyberpunk', 'synth-industrial': 'cybercore-tech', synthwave: 'synthwave',
+    'terminal-ghost': 'default', tokyo: 'cyberpunk', mashup: 'mashup'
+  };
+  const FAMILY_DESCRIPTIONS = {
+    mashup: 'signature blends across the Cybercore palette families',
+    alien: 'extraterrestrial signals and orbital patterns', cyberdark: 'deep-space darkness with electric telemetry',
+    'cyberdark-grid': 'precision grids and architectural perspective', 'cyberdark-industrial': 'industrial systems and machine telemetry',
+    'cyberdark-ops': 'tactical overlays, targeting, and command systems', cyborg: 'human-machine interfaces and augmented vision',
+    'dark-futurism': 'monolithic silhouettes and speculative shadow', 'dark-skylines': 'dense city silhouettes after midnight',
+    'dystopian-frontier': 'weathered settlements beyond the perimeter', futuristic: 'clean orbital geometry and forward motion',
+    'neon-noir': 'rain, reflections, and detective-city glow', 'night-ops': 'low-light radar and covert operations',
+    'omarchy-live': 'live desktop surfaces and responsive controls', 'plasma-core': 'contained energy and magnetic turbulence',
+    'signal-cities': 'broadcast towers and connected urban signals', 'synth-industrial': 'mechanical rhythm with synthetic current',
+    'terminal-ghost': 'haunted terminals and residual machine text', tokyo: 'dense signage and electric boulevard light'
+  };
   const $ = s => document.querySelector(s);
   const $$ = s => [...document.querySelectorAll(s)];
   const display = s => (s || 'unknown-family').replaceAll('-', ' ').toUpperCase();
@@ -50,7 +79,9 @@
   const labelOf = id => { const b = blendOf(id); return b ? b.label : display(id); };
   const familyName = family => LABELS[family] || display(family);
   const familyShort = family => SHORT[family] || display(family);
-  const familyIcon = family => FAMILY_ICONS.has(family) ? family : 'mashup';
+  const familyIcon = family => FAMILY_ICONS[family] || 'mashup';
+  const familyColor = family => FAMILY_COLORS[family] || '#00e5ff';
+  const familyDescription = family => FAMILY_DESCRIPTIONS[family] || `${display(family).toLowerCase()} visual language`;
   const familyLabel = id => mashOf(id) ? 'SIGNATURE MASHUP' : parseMix(id) ? 'LAB MASHUP' : familyName(familyOf(id));
 
   async function palette(name) {
@@ -156,6 +187,7 @@
       if (!items.length) return;
       const h = document.createElement('div');
       h.className = 'theme-group-label'; h.dataset.family = family;
+      h.style.setProperty('--fa', familyColor(family));
       h.innerHTML = `<svg aria-hidden="true"><use href="#fam-${familyIcon(family)}"/></svg>${familyName(family)}<em>${items.length}</em>`;
       list.append(h);
       items.forEach((name, i) => {
@@ -229,7 +261,7 @@
   function buildFamilies() {
     const el = $('#families'); if (!el) return;
     const fams = [['all', allNames()], ...groups()];
-    el.innerHTML = fams.map(([f, names]) => `<button class="fam" role="tab" data-family="${f}" aria-selected="${f === activeFamily}" style="${f === 'all' ? '--fa:var(--white)' : ''}"><svg aria-hidden="true"><use href="#fam-${f === 'all' ? 'mashup' : familyIcon(f)}"/></svg>${f === 'all' ? 'ALL' : familyShort(f)}<em>${names.length}</em></button>`).join('');
+    el.innerHTML = fams.map(([f, names]) => `<button class="fam" role="tab" data-family="${f}" aria-selected="${f === activeFamily}" style="--fa:${f === 'all' ? 'var(--white)' : familyColor(f)}"><svg aria-hidden="true"><use href="#fam-${f === 'all' ? 'mashup' : familyIcon(f)}"/></svg>${f === 'all' ? 'ALL' : familyShort(f)}<em>${f === 'all' ? allNames().length + SITE.mashups.length : names.length}</em></button>`).join('');
     el.querySelectorAll('.fam').forEach(b => b.addEventListener('click', () => {
       activeFamily = b.dataset.family;
       el.querySelectorAll('.fam').forEach(x => x.setAttribute('aria-selected', String(x === b)));
@@ -249,9 +281,10 @@
     const pals = await Promise.all(names.map(n => resolve(n).catch(() => null)));
     el.innerHTML = names.map((n, i) => {
       const p = pals[i]; if (!p) return '';
-      const fam = mashOf(n) ? 'SIGNATURE MASHUP' : familyName(familyOf(n));
+      const family = familyOf(n);
+      const fam = mashOf(n) ? 'SIGNATURE MASHUP' : familyName(family);
       return `<button type="button" class="tcard" data-value="${n}" aria-pressed="${n === current}" style="${cardStyle(p)};--i:${i}">${scene(n, p)}
-        <div class="t-meta"><div class="t-name">${labelOf(n)}</div><div class="t-dots">${NEON.map(k => `<i style="background:#${p[k]}"></i>`).join('')}</div><div class="t-fam">${fam}</div></div></button>`;
+        <div class="t-meta"><div class="t-name">${labelOf(n)}</div><div class="t-dots">${NEON.map(k => `<i style="background:#${p[k]}"></i>`).join('')}</div><div class="t-fam">${fam}</div><div class="t-desc">${familyDescription(family || 'mashup')}</div></div></button>`;
     }).join('');
     el.querySelectorAll('.tcard').forEach(c => c.addEventListener('click', ev => apply(c.dataset.value, { origin: originOf(ev) })));
     document.dispatchEvent(new CustomEvent('cc:cards'));

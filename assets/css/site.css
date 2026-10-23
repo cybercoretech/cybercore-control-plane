@@ -371,6 +371,7 @@ pre .copy:hover { color: var(--cyan); border-color: var(--cyan); }
 .fam:hover { color: var(--white); border-color: var(--fa); }
 .fam[aria-selected="true"] { color: var(--white); border-color: var(--fa); background: color-mix(in srgb, var(--fa) 14%, var(--panel)); box-shadow: inset 0 -2px var(--fa); }
 .fam[aria-selected="true"] svg { filter: drop-shadow(0 0 6px var(--fa)); }
+.t-desc { margin-top: .28rem; color: var(--t-muted, var(--muted)); font-size: .5rem; line-height: 1.25; letter-spacing: .04em; text-transform: none; }
 .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(13.5rem, 1fr)); gap: 1rem; perspective: 1200px; }
 .tcard {
   --rx: 0deg; --ry: 0deg;

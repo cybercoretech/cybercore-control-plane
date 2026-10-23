@@ -260,19 +260,21 @@
     return `<p>${intro}</p>${content}<div class="stat-dialog-links">${statInfo[activeStat].links.map(([label, href]) => `<a href="${href}" ${href.startsWith('http') ? 'target="_blank" rel="noreferrer"' : ''}>${label} ↗</a>`).join('')}</div>`;
   }
   let activeStat = '';
-  function renderThemes() {
+  function renderThemes(activeFamily = 'all') {
     const registry = window.CC?.registry;
     if (!registry) return '<p>Registry is still synchronizing. Reopen this panel in a moment.</p>';
     const sourceNames = Object.values(registry.families).flat();
     const groups = [['all', [...sourceNames, ...registry.mashups.map(m => m.id)]], ['mashup', registry.mashups.map(m => m.id)], ...Object.entries(registry.families)];
-    const tabs = groups.map(([family, names], i) => `<button type="button" class="stat-explorer-tab${i === 0 ? ' is-active' : ''}" data-explorer-tab="${escapeHtml(family)}">${escapeHtml(family === 'all' ? 'ALL THEMES' : family === 'mashup' ? 'MASHUPS' : familyLabel(family))}<b>${names.length}</b></button>`).join('');
-    const panels = groups.map(([family, names], i) => `<section class="stat-explorer-panel${i === 0 ? ' is-active' : ''}" data-explorer-panel="${escapeHtml(family)}"><div class="stat-theme-grid">${names.map(name => `<span class="stat-theme-item">${escapeHtml(name.replaceAll('-', ' ').toUpperCase())}</span>`).join('')}</div></section>`).join('');
+    const familyFor = name => name.startsWith('cc-') ? 'mashup' : Object.keys(registry.families).find(family => registry.families[family].includes(name)) || 'mashup';
+    const colorFor = family => registry.colors[family] || '#ff2bd6';
+    const tabs = groups.map(([family, names]) => `<button type="button" class="stat-explorer-tab${family === activeFamily ? ' is-active' : ''}" data-explorer-tab="${escapeHtml(family)}">${escapeHtml(family === 'all' ? 'ALL THEMES' : family === 'mashup' ? 'MASHUPS' : familyLabel(family))}<b>${names.length}</b></button>`).join('');
+    const panels = groups.map(([family, names]) => `<section class="stat-explorer-panel${family === activeFamily ? ' is-active' : ''}" data-explorer-panel="${escapeHtml(family)}"><div class="stat-theme-grid">${names.map(name => `<button type="button" class="stat-theme-item" data-theme-id="${escapeHtml(name)}" style="--item-accent:${colorFor(family === 'all' ? familyFor(name) : family)}">${escapeHtml(name.replaceAll('-', ' ').toUpperCase())}</button>`).join('')}</div></section>`).join('');
     return explorerShell('The complete live inventory is grouped by registry family. Select a tab to scan every source palette and signature mashup without leaving the Control Plane.', `<div class="stat-explorer-tabs">${tabs}</div>${panels}`);
   }
   function renderFamilies() {
     const registry = window.CC?.registry;
     if (!registry) return '<p>Registry is still synchronizing. Reopen this panel in a moment.</p>';
-    const items = Object.entries(registry.families).map(([family, names]) => `<article class="stat-family-item"><div><b>${escapeHtml(familyLabel(family))}</b><span>${names.length} THEMES</span></div><p>${escapeHtml(family.replaceAll('-', ' '))} visual language with a curated twelve-palette path in the canonical registry.</p></article>`).join('');
+    const items = Object.entries(registry.families).map(([family, names]) => `<button type="button" class="stat-family-item" data-family-open="${escapeHtml(family)}" style="--item-accent:${registry.colors[family] || '#ff2bd6'}"><div><b>${escapeHtml(familyLabel(family))}</b><span>${names.length} THEMES</span></div><p>${escapeHtml(family.replaceAll('-', ' '))} visual language with a curated twelve-palette path in the canonical registry.</p></button>`).join('');
     return explorerShell('Every canonical family is listed below with its live palette count and registry identity.', `<div class="stat-family-grid">${items}</div>`);
   }
   function renderSlots() {
@@ -287,6 +289,18 @@
       $$('.stat-explorer-tab').forEach(item => item.classList.toggle('is-active', item === tab));
       $$('.stat-explorer-panel').forEach(panel => panel.classList.toggle('is-active', panel.dataset.explorerPanel === family));
     }));
+    $$('.stat-theme-item').forEach(item => item.addEventListener('click', () => {
+      window.CC?.apply(item.dataset.themeId);
+      statDialog?.close();
+    }));
+  }
+  function showThemeFamily(family = 'all') {
+    activeStat = 'themes';
+    statDialogTitle.textContent = statInfo.themes.title;
+    statDialogKicker.textContent = 'CYBERGRID / THEMES';
+    statDialogBody.innerHTML = renderThemes(family);
+    statDialog.classList.add('is-explorer');
+    wireThemeExplorer();
   }
   const statInfo = {
     themes: {
@@ -319,6 +333,7 @@
     statDialogBody.innerHTML = content;
     statDialog.classList.toggle('is-explorer', key === 'themes' || key === 'families' || key === 'slots' || key === 'runtimes');
     if (key === 'themes') wireThemeExplorer();
+    $$('.stat-family-item').forEach(item => item.addEventListener('click', () => showThemeFamily(item.dataset.familyOpen)));
     statDialog.showModal();
   }
   $$('.stat-card').forEach(card => card.addEventListener('click', () => openStat(card.dataset.stat)));

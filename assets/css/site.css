@@ -315,11 +315,12 @@ html:not(.booting) .boot { display: none; }
 .stat-explorer-panel { display: none; max-height: min(48vh, 28rem); overflow: auto; }
 .stat-explorer-panel.is-active { display: block; }
 .stat-theme-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .35rem; }
-.stat-theme-item { min-width: 0; padding: .55rem .6rem; border: 1px solid color-mix(in srgb, var(--line) 80%, transparent); color: var(--muted); background: color-mix(in srgb, var(--bg) 55%, transparent); font: .56rem/1.3 var(--mono); overflow-wrap: anywhere; }
-.stat-theme-item:hover { color: var(--cyan); border-color: var(--cyan); }
+.stat-theme-item { min-width: 0; padding: .55rem .6rem; border: 1px solid color-mix(in srgb, var(--item-accent, var(--cyan)) 35%, var(--line)); color: var(--muted); background: color-mix(in srgb, var(--item-accent, var(--cyan)) 4%, var(--bg)); cursor: pointer; text-align: left; font: .56rem/1.3 var(--mono); overflow-wrap: anywhere; transition: color .18s, border-color .18s, background .18s, box-shadow .18s, transform .18s; }
+.stat-theme-item:hover, .stat-theme-item:focus-visible { color: var(--item-accent, var(--cyan)); border-color: var(--item-accent, var(--cyan)); background: color-mix(in srgb, var(--item-accent, var(--cyan)) 12%, var(--bg)); box-shadow: 0 0 1rem color-mix(in srgb, var(--item-accent, var(--cyan)) 22%, transparent); transform: translateY(-1px); outline: none; }
 .stat-family-grid, .stat-slot-grid, .stat-runtime-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .7rem; max-height: min(54vh, 32rem); overflow: auto; }
 .stat-family-item, .stat-slot-item, .stat-runtime-item { padding: .85rem; border: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 55%, transparent); }
-.stat-family-item { border-top: 2px solid var(--pink); }
+.stat-family-item { width: 100%; border-top: 2px solid var(--item-accent, var(--pink)); color: inherit; text-align: left; cursor: pointer; transition: color .18s, border-color .18s, background .18s, box-shadow .18s, transform .18s; }
+.stat-family-item:hover, .stat-family-item:focus-visible { border-color: var(--item-accent, var(--pink)); background: color-mix(in srgb, var(--item-accent, var(--pink)) 10%, var(--bg)); box-shadow: 0 0 1.2rem color-mix(in srgb, var(--item-accent, var(--pink)) 18%, transparent); transform: translateY(-2px); outline: none; }
 .stat-family-item div { display: flex; justify-content: space-between; gap: .5rem; align-items: baseline; }
 .stat-family-item b, .stat-slot-item b, .stat-runtime-item b { color: var(--white); font: 600 .72rem/1.3 var(--display); letter-spacing: .04em; }
 .stat-family-item span { color: var(--cyan); font: .52rem var(--mono); white-space: nowrap; }

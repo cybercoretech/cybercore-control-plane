@@ -413,7 +413,8 @@
     get registry() {
       return {
         families: Object.fromEntries(Object.entries(families).map(([family, names]) => [family, [...names]])),
-        mashups: SITE.mashups.map(m => ({ ...m }))
+        mashups: SITE.mashups.map(m => ({ ...m })),
+        colors: { ...FAMILY_COLORS }
       };
     }
   };

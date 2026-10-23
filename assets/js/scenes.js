@@ -23,6 +23,7 @@ window.CC_SCENE = (() => {
   const S = {
     cybercard(p, s, r, family, id) {
       const profiles = {
+        mashup: ['SIGNATURE MASHUP', 'KITTY PALETTE FUSION', 'hot_pink', 'cyan'],
         'cybercore-tech': ['CYBERCORE TECH', 'GOVERNED SYSTEM', 'acid_green', 'cyan'],
         alien: ['ALIEN SIGNAL', 'EXTRATERRESTRIAL RELAY', 'purple', 'cyan'],
         cyberdark: ['CYBERDARK', 'NOCTURNAL SYSTEM', 'cyan', 'purple'],
@@ -301,6 +302,10 @@ window.CC_SCENE = (() => {
     const r = rng(seedOf(id));
     let body;
     if (blend) {
+      if (blend.baseFamily === 'kitty' || blend.accentFamily === 'kitty') {
+        body = S.cybercard(p, s, r, 'mashup', id);
+        return `<svg class="scene" viewBox="0 0 ${W} ${H}" aria-hidden="true">${body}</svg>`;
+      }
       const a = inner(blend.baseFamily, p, `${s}a`, r), b = inner(blend.accentFamily, p, `${s}b`, r);
       body = `<defs><clipPath id="L${s}"><path d="M0 0H96L64 80H0Z"/></clipPath><clipPath id="R${s}"><path d="M96 0H${W}V${H}H64Z"/></clipPath>${glow(s)}</defs>
         <g clip-path="url(#L${s})">${a}</g><g clip-path="url(#R${s})">${b}</g>

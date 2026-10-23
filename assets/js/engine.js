@@ -61,12 +61,13 @@
   const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   let families = {};
+  let kittyThemes = {};
   let current = null;
   let currentPalette = FALLBACK;
   const cache = {};
 
   /* ---------- registry ---------- */
-  const familyOf = name => Object.keys(families).find(f => families[f].includes(name));
+  const familyOf = name => name && kittyThemes[name.replace(/^kitty:/, '')] ? 'kitty' : Object.keys(families).find(f => families[f].includes(name));
   const allNames = () => Object.values(families).flat();
   const mashOf = id => SITE.mashups.find(m => m.id === id);
   const parseMix = id => {
@@ -86,6 +87,8 @@
 
   async function palette(name) {
     if (cache[name]) return cache[name];
+    const kittyName = name && name.replace(/^kitty:/, '');
+    if (kittyThemes[kittyName]) return (cache[name] = kittyThemes[kittyName]);
     const family = familyOf(name);
     if (!family) throw new Error(`unknown theme ${name}`);
     const res = await fetch(`${DATA}/themes/${family}/${name}.json`);
@@ -364,6 +367,10 @@
     flushDots();
   }
   async function boot() {
+    try {
+      const kitty = await (await fetch(SITE.kittyThemesUrl || 'data/kitty-themes.json')).json();
+      kittyThemes = kitty.themes || {};
+    } catch (e) { console.warn('Kitty theme source offline', e); }
     try {
       const schema = await (await fetch(`${DATA}/cybergrid.json`)).json();
       families = schema.families || {};

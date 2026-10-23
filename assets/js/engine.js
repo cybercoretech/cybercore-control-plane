@@ -254,9 +254,21 @@
     const list = $('#themeList');
     buildList(list, { onPick: (name, ev) => { apply(name, { origin: originOf(ev) }); header.close(); setTimeout(() => $('#themeButton').focus({ preventScroll: true })); } });
     header = wireMenu($('#themeButton'), $('#themeMenu'), list, $('#themeFilter'));
-    const total = SITE.mashups.length + allNames().length;
-    const f = $('#themeFilter'); if (f) f.placeholder = `FILTER ${total} THEMES…`;
-    $$('[data-theme-count]').forEach(el => { el.textContent = allNames().length; });
+    updateCounts();
+  }
+
+  function updateCounts() {
+    const source = allNames().length;
+    const mashups = SITE.mashups.length;
+    const total = source + mashups;
+    const familyCount = Object.keys(families).length;
+    const f = $('#themeFilter');
+    if (f) f.placeholder = `FILTER ${total} THEMES…`;
+    $$('[data-source-theme-count]').forEach(el => { el.textContent = source; });
+    $$('[data-theme-count]').forEach(el => { el.textContent = total; });
+    $$('[data-mashup-count]').forEach(el => { el.textContent = mashups; });
+    $$('[data-count-key="themes"]').forEach(el => { el.dataset.count = total; });
+    $$('[data-count-key="families"]').forEach(el => { el.dataset.count = familyCount; });
   }
 
   /* ---------- 02: matrix ---------- */

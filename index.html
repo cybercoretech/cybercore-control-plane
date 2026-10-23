@@ -40,9 +40,9 @@
       ]
     };
   </script>
-  <script src="assets/js/scenes.js?v=0.9.3" defer></script>
-  <script src="assets/js/engine.js?v=0.9.3" defer></script>
-  <script src="assets/js/fx.js?v=0.9.3" defer></script>
+  <script src="assets/js/scenes.js?v=0.9.4" defer></script>
+  <script src="assets/js/engine.js?v=0.9.4" defer></script>
+  <script src="assets/js/fx.js?v=0.9.4" defer></script>
   <script src="assets/js/updates.js" defer></script>
   <script type="module" src="https://cybercoretech.github.io/kit/contact.js"></script>
 </head>
@@ -119,7 +119,7 @@
         <i class="theme-swatch" aria-hidden="true"></i><span id="themeLabel">LOADING…</span><svg class="chev" aria-hidden="true"><use href="#i-chev"/></svg>
       </button>
       <div class="theme-menu" id="themeMenu" hidden>
-        <div class="theme-search"><input id="themeFilter" type="search" placeholder="FILTER 255 THEMES…" aria-label="Filter themes" autocomplete="off" spellcheck="false"></div>
+        <div class="theme-search"><input id="themeFilter" type="search" placeholder="FILTER 312 THEMES…" aria-label="Filter themes" autocomplete="off" spellcheck="false"></div>
         <div class="theme-list" id="themeList" role="listbox" aria-label="Theme"></div>
       </div>
     </div>
@@ -133,7 +133,7 @@
       <div class="hero-vignette" aria-hidden="true"></div>
       <div class="wrap hero-grid">
         <div class="hero-copy">
-          <p class="eyebrow"><span class="led"></span>CYBERGRID // THEME ENGINE v0.8 · <b data-theme-count>255</b> SOURCE PALETTES · ONE SOURCE OF TRUTH</p>
+          <p class="eyebrow"><span class="led"></span>CYBERGRID // THEME ENGINE v0.8 · <b data-source-theme-count>300</b> SOURCE PALETTES · ONE SOURCE OF TRUTH</p>
           <h1 class="title" aria-label="Cybercore">
             <span class="glitch" data-text="CYBER">CYBER</span><span class="glitch outline" data-text="CORE">CORE</span>
           </h1>
@@ -167,8 +167,8 @@
         </div>
       </div>
       <div class="wrap stats">
-        <div><b data-count="255">0</b><span>THEMES</span></div>
-        <div><b data-count="24">0</b><span>FAMILIES</span></div>
+        <div><b data-count="312" data-count-key="themes">0</b><span>THEMES</span></div>
+        <div><b data-count="25" data-count-key="families">0</b><span>FAMILIES</span></div>
         <div><b data-count="11">0</b><span>PALETTE SLOTS</span></div>
         <div><b data-count="4">0</b><span>RUNTIMES</span></div>
       </div>
@@ -226,7 +226,7 @@
       <div class="wrap">
         <div class="head reveal">
           <div><p class="kicker">02 / THEME MATRIX</p><h2 class="scramble">Every family.<br><em>Pick your signal.</em></h2></div>
-          <p>All <b data-theme-count>255</b> Cybercore themes across the full registry, each previewed in its own colours. Click a card to repaint the page. Your choice follows you to every Cybercore site.</p>
+          <p>All <b data-theme-count>312</b> Cybercore themes across the full registry, each previewed in its own colours. Click a card to repaint the page. Your choice follows you to every Cybercore site.</p>
         </div>
         <div class="families reveal" id="families" role="tablist" aria-label="Theme families"></div>
         <div class="cards" id="cards"></div>
@@ -490,7 +490,7 @@ curl localhost:8787/schema</code></pre>
         </div>
       </div>
       <div class="cli-install reveal">
-        <div><p class="kicker">CYBERCORE 0.8.1 / CONTROL PLANE</p><h3>Install the modular surface.</h3><p>The Control Plane inventories 287 governed resources and 255 themes, with 104 effects, 54 components, 114 snippets, 14 assets, and the CyberDark wallpaper pack.</p><a href="https://crates.io/crates/cybercore-core">VIEW THE CORE CRATE ↗</a></div>
+        <div><p class="kicker">CYBERCORE 0.8.1 / CONTROL PLANE</p><h3>Install the modular surface.</h3><p>The Control Plane inventories 287 governed resources and <b data-source-theme-count>300</b> source themes plus <b data-mashup-count>12</b> signature mashups, with 104 effects, 54 components, 114 snippets, 14 assets, and the CyberDark wallpaper pack.</p><a href="https://crates.io/crates/cybercore-core">VIEW THE CORE CRATE ↗</a></div>
         <div class="cli-command"><span>MODULAR CRATES / CRATES.IO</span><code>cargo add cybercore-core cybercore-effects cybercore-components</code><a href="https://crates.io/crates/cybercore-publish">PUBLISH CONTRACT ↗</a><small>Theme CLI: <code>cargo install --locked cybercore --bin cybercore-theme</code></small></div>
       </div>
     </section>

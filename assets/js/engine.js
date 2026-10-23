@@ -267,8 +267,8 @@
     $$('[data-source-theme-count]').forEach(el => { el.textContent = source; });
     $$('[data-theme-count]').forEach(el => { el.textContent = total; });
     $$('[data-mashup-count]').forEach(el => { el.textContent = mashups; });
-    $$('[data-count-key="themes"]').forEach(el => { el.dataset.count = total; });
-    $$('[data-count-key="families"]').forEach(el => { el.dataset.count = familyCount; });
+    $$('[data-count-key="themes"]').forEach(el => { el.dataset.count = total; el.textContent = total; });
+    $$('[data-count-key="families"]').forEach(el => { el.dataset.count = familyCount; el.textContent = familyCount; });
   }
 
   /* ---------- 02: matrix ---------- */

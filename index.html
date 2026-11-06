@@ -18,33 +18,17 @@
   <link rel="stylesheet" href="assets/css/site.css">
   <link rel="stylesheet" href="control-plane.css">
   <script>
-    /* Signature mashups: surfaces (bg/text/panel/line/muted) from `base`,
-       neons from `accent`. Names are provisional until approved. */
     window.SITE = {
       dataRoot: 'https://cybercoretech.github.io/data',
-      kittyThemesUrl: 'data/kitty-themes.json',
-      defaultTheme: 'cybercore-tech',
-      mashups: [
-        { id: 'cc-chrome-horizon', label: 'CHROME HORIZON', base: 'cyberdyne-steel', accent: 'synthwave-outrun' },
-        { id: 'cc-skynet-plasma', label: 'SKYNET PLASMA', base: 'cyberdyne-skynet', accent: 'neosynth-plasma' },
-        { id: 'cc-midnight-mainframe', label: 'MIDNIGHT MAINFRAME', base: 'synthwave-sunset', accent: 'cyberpunk-neon' },
-        { id: 'cc-judgment-grid', label: 'JUDGMENT GRID', base: 'cyberdyne-judgment', accent: 'neosynth-laser-grid' },
-        { id: 'cc-dracula-tokyo', label: 'DRACULA // TOKYO NIGHT', base: 'kitty:dracula', accent: 'kitty:tokyo-night' },
-        { id: 'cc-catppuccin-nord', label: 'CATPPUCCIN // NORD', base: 'kitty:catppuccin-mocha', accent: 'kitty:nord' },
-        { id: 'cc-gruvbox-monokai', label: 'GRUVBOX // MONOKAI', base: 'kitty:gruvbox-dark', accent: 'kitty:monokai-pro' },
-        { id: 'cc-onyx-material', label: 'ONE DARK // MATERIAL OCEAN', base: 'kitty:one-dark', accent: 'kitty:material-ocean' },
-        { id: 'cc-kanagawa-rose', label: 'KANAGAWA // ROSE PINE', base: 'kitty:kanagawa-wave', accent: 'kitty:rose-pine-moon' },
-        { id: 'cc-evernight-fox', label: 'EVERFOREST // NIGHTFOX', base: 'kitty:everforest-dark', accent: 'kitty:nightfox' },
-        { id: 'cc-solarized-ayu', label: 'SOLARIZED // AYU', base: 'kitty:solarized-dark', accent: 'kitty:ayu' },
-        { id: 'cc-oxide-vesper', label: 'OXOCARBON // VESPER', base: 'kitty:oxocarbon', accent: 'kitty:vesper' }
-      ]
+      defaultTheme: 'cybercore-tech'
+      // The 12 signature mashups come from <dataRoot>/mashups.json, shared by every site.
     };
   </script>
   <script src="assets/js/scenes.js?v=0.9.9" defer></script>
-  <script src="assets/js/engine.js?v=0.9.9" defer></script>
-  <script src="assets/js/fx.js?v=0.9.9" defer></script>
+  <script src="assets/js/engine.js?v=0.9.10" defer></script>
+  <script src="assets/js/fx.js?v=0.9.10" defer></script>
   <script src="assets/js/updates.js" defer></script>
-  <script src="assets/js/schema.js" defer></script>
+  <script src="assets/js/schema.js?v=2" defer></script>
   <script type="module" src="https://cybercoretech.github.io/kit/contact.js"></script>
 </head>
 <body>
@@ -120,7 +104,7 @@
         <i class="theme-swatch" aria-hidden="true"></i><span id="themeLabel">LOADING…</span><svg class="chev" aria-hidden="true"><use href="#i-chev"/></svg>
       </button>
       <div class="theme-menu" id="themeMenu" hidden>
-        <div class="theme-search"><input id="themeFilter" type="search" placeholder="FILTER 312 THEMES…" aria-label="Filter themes" autocomplete="off" spellcheck="false"></div>
+        <div class="theme-search"><input id="themeFilter" type="search" placeholder="FILTER 612 THEMES…" aria-label="Filter themes" autocomplete="off" spellcheck="false"></div>
         <div class="theme-list" id="themeList" role="listbox" aria-label="Theme"></div>
       </div>
     </div>
@@ -168,7 +152,7 @@
         </div>
       </div>
       <div class="wrap stats">
-        <button class="stat-card" type="button" data-stat="themes"><b data-count="312" data-count-key="themes">0</b><span>THEMES</span></button>
+        <button class="stat-card" type="button" data-stat="themes"><b data-count="612" data-count-key="themes">0</b><span>THEMES</span></button>
         <button class="stat-card" type="button" data-stat="families"><b data-count="25" data-count-key="families">0</b><span>FAMILIES</span></button>
         <button class="stat-card" type="button" data-stat="slots"><b data-count="11">0</b><span>PALETTE SLOTS</span></button>
         <button class="stat-card" type="button" data-stat="runtimes"><b data-count="4">0</b><span>RUNTIMES</span></button>
@@ -209,7 +193,7 @@
     <section class="section wrap" id="studio">
       <div class="head">
         <div><p class="kicker">LIVE / CYBERCORE CONTROL PLANE</p><h2 class="scramble">Every theme.<br><em>One control surface.</em></h2></div>
-        <p>Browse all 312 registry themes, open family explorers, inspect Cybercards, and select a live palette from the browser. The same governed registry drives the Web Kit, native tooling, and installable packs.</p>
+        <p>Browse all <span data-theme-count>612</span> registry themes, open family explorers, inspect Cybercards, and select a live palette from the browser. The same governed registry drives the Web Kit, native tooling, and installable packs.</p>
       </div>
       <div class="studio-shots">
         <figure class="studio-shot">
@@ -267,7 +251,7 @@
       <div class="wrap">
         <div class="head reveal">
           <div><p class="kicker">02 / THEME MATRIX</p><h2 class="scramble">Every family.<br><em>Pick your signal.</em></h2></div>
-          <p>All <b data-theme-count>312</b> Cybercore themes across the full registry, each previewed in its own colours. Click a card to repaint the page. Your choice follows you to every Cybercore site.</p>
+          <p>All <b data-theme-count>612</b> Cybercore themes across the full registry, each previewed in its own colours. Click a card to repaint the page. Your choice follows you to every Cybercore site.</p>
         </div>
         <div class="families reveal" id="families" role="tablist" aria-label="Theme families"></div>
         <div class="cards" id="cards"></div>

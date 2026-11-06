@@ -88,12 +88,19 @@
   async function palette(name) {
     if (cache[name]) return cache[name];
     const kittyName = name && name.replace(/^kitty:/, '');
-    if (kittyThemes[kittyName]) return (cache[name] = kittyThemes[kittyName]);
+    if (kittyThemes[kittyName]) return (cache[name] = normalise(kittyThemes[kittyName]));
     const family = familyOf(name);
     if (!family) throw new Error(`unknown theme ${name}`);
     const res = await fetch(`${DATA}/themes/${family}/${name}.json`);
     if (!res.ok) throw new Error(`${name}: HTTP ${res.status}`);
-    return (cache[name] = await res.json());
+    return (cache[name] = normalise(await res.json()));
+  }
+  // Registry palettes use the 20-role format (border/surface); keep the 11 slots filled.
+  function normalise(raw) {
+    const p = { ...raw };
+    p.line ||= p.border; p.panel ||= p.surface; p.white ||= p.text_primary;
+    SLOTS.forEach(k => { if (!/^[0-9a-f]{6}$/i.test(p[k] || '')) p[k] = FALLBACK[k]; });
+    return p;
   }
   function blend(base, accent) {
     const out = { ...accent };
@@ -204,9 +211,24 @@
       });
     });
   }
-  // swatch dots fill in as palettes arrive (preloadAll)
+  // Swatch dots load as options scroll into view (never all 612 up front).
   const pendingDots = [];
-  function dotsLater(btn, name) { pendingDots.push([btn, name]); }
+  const dotObservers = new Map();
+  function dotsLater(btn, name) {
+    pendingDots.push([btn, name]);
+    const list = btn.parentElement;
+    if (!dotObservers.has(list)) {
+      dotObservers.set(list, new IntersectionObserver(entries => entries.forEach(async e => {
+        if (!e.isIntersecting) return;
+        dotObservers.get(list).unobserve(e.target);
+        try {
+          const p = await resolve(e.target.dataset.value);
+          e.target.querySelector('.dots').innerHTML = ['acid_green', 'hot_pink', 'cyan'].map(k => `<i style="background:#${p[k]}"></i>`).join('');
+        } catch { /* leave empty */ }
+      }), { root: list, rootMargin: '120px 0px' }));
+    }
+    dotObservers.get(list).observe(btn);
+  }
   function flushDots() {
     pendingDots.forEach(([btn, name]) => {
       const p = cache[name] || (blendOf(name) && cache[blendOf(name).base] && cache[blendOf(name).accent] && blend(cache[blendOf(name).base], cache[blendOf(name).accent]));
@@ -380,12 +402,18 @@
   }
   async function boot() {
     try {
-      const kitty = await (await fetch(SITE.kittyThemesUrl || 'data/kitty-themes.json')).json();
+      const kitty = await (await fetch(`${DATA}/kitty-themes.json`)).json();
       kittyThemes = kitty.themes || {};
     } catch (e) { console.warn('Kitty theme source offline', e); }
     try {
-      const schema = await (await fetch(`${DATA}/cybergrid.json`)).json();
+      const [schema, shared] = await Promise.all([
+        fetch(`${DATA}/cybergrid.json`).then(r => r.json()),
+        fetch(`${DATA}/mashups.json`).then(r => (r.ok ? r.json() : { mashups: [] })).catch(() => ({ mashups: [] }))
+      ]);
       families = schema.families || {};
+      // The 12 signature mashups are shared by every Cybercore site.
+      SITE.mashups = (shared.mashups || []).filter(m => familyOf(m.base) && familyOf(m.accent));
+      document.dispatchEvent(new CustomEvent('cc:mashups', { detail: SITE.mashups }));
     } catch (e) {
       console.warn('theme registry offline', e);
       $('#themeLabel').textContent = 'REGISTRY OFFLINE';

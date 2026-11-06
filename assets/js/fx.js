@@ -433,7 +433,7 @@
 
   /* ---------- scroll progress + active nav ---------- */
   const prog = $('#progress');
-  const navLinks = $$('.nav a');
+  const navLinks = $$('.nav a[href^="#"]'); // in-page links only; external ones aren't sections
   const sections = navLinks.map(a => $(a.getAttribute('href')));
   addEventListener('scroll', () => {
     const max = document.documentElement.scrollHeight - innerHeight;

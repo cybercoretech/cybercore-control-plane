@@ -18,3 +18,12 @@
 .schema-status { display:flex; align-items:center; gap:.8rem; flex-wrap:wrap; margin:1rem 0 1.3rem; padding:.8rem 1rem; border:1px solid var(--line); background:var(--glass); color:var(--muted); font:.65rem var(--mono); }.schema-status strong { color:var(--white); font-weight:800; }.schema-status b { color:var(--cyan); }.schema-status a { margin-left:auto; color:var(--cyan); text-decoration:none; font-weight:800; }.schema-status a:hover { color:var(--acid); }
 @media (max-width:1000px) { .cp-grid,.cp-resource-grid,.cp-roadmap { grid-template-columns:repeat(2,1fr); }.cp-pack-grid { grid-template-columns:repeat(2,1fr); } }
 @media (max-width:720px) { .cp-grid,.cp-resource-grid,.cp-pack-grid,.cp-roadmap,.cp-mod-grid,.cp-install,.signal-grid,.cp-pack-command-grid { grid-template-columns:1fr; }.cp-flow { justify-content:flex-start; line-height:1.8; }.signal-toolbar { align-items:flex-start; flex-direction:column; } }
+
+/* Phones: the wordmark fills the bar, so the theme button shows its swatch
+   (its title and the menu still name the theme). */
+@media (max-width: 560px) {
+  .theme-button #themeLabel { display: none; }
+  .theme-button { min-width: 0; gap: .5rem; }
+}
+/* Decorative SVG rings extend past the edge on phones; never scroll sideways. */
+html, body { overflow-x: clip; }

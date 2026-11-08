@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Signal lost — Cybercore Control Plane</title>
+  <!-- Self-contained on purpose: this page is served for any missing path on
+       both hosts (Cloudflare root and the GitHub /cybercore-control-plane/
+       mirror), so it cannot rely on relative asset paths. -->
+  <style>
+    :root { --bg: #09080f; --panel: #16151f; --line: #32303e; --white: #f0f0f2; --muted: #807f8b; --pink: #ff147f; --cyan: #00e5ff; --acid: #39ff33; }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 1rem; background: var(--bg); color: var(--white); font: 16px/1.5 ui-monospace, "Share Tech Mono", monospace; }
+    main { width: min(100%, 34rem); padding: 2rem 1.5rem; border: 1px solid var(--line); border-top: 2px solid var(--pink); background: var(--panel); }
+    p.k { margin: 0 0 .5rem; color: var(--pink); font-size: .72rem; letter-spacing: .2em; }
+    h1 { margin: 0 0 .75rem; font-size: clamp(2.4rem, 12vw, 4rem); line-height: 1; letter-spacing: .04em; text-shadow: 2px 0 var(--pink), -2px 0 var(--cyan); }
+    p { margin: 0 0 1.5rem; color: var(--muted); }
+    code { color: var(--acid); word-break: break-all; }
+    a { display: inline-block; padding: .7rem 1rem; border: 1px solid var(--cyan); color: var(--cyan); text-decoration: none; letter-spacing: .14em; font-size: .8rem; }
+    a:hover, a:focus-visible { outline: none; background: color-mix(in srgb, var(--cyan) 14%, transparent); }
+  </style>
+</head>
+<body>
+  <main>
+    <p class="k">CYBERGRID / 404</p>
+    <h1>SIGNAL LOST</h1>
+    <p>No route for <code id="path">this path</code> on the Control Plane.</p>
+    <a id="home" href="https://cybercore-control-plane.pages.dev/">RETURN TO CONTROL PLANE →</a>
+  </main>
+  <script>
+    document.getElementById('path').textContent = location.pathname;
+    document.getElementById('home').href = location.hostname.endsWith('github.io') ? '/cybercore-control-plane/' : '/';
+  </script>
+</body>
+</html>

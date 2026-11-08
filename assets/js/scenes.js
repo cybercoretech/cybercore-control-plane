@@ -1,311 +1,141 @@
-/* Theme-matrix card art: one scene per family, painted in the card's own palette.
+/* Theme-matrix card art, painted in each card's own palette.
  *
- *   synthwave       outrun sun over a perspective grid
- *   cyberdyne       targeting reticle, readouts, scan band
- *   cyberpunk       rain-soaked neon skyline
- *   neosynth        oscilloscope, spectrum bars, laser fan
- *   dystopian       ruins in smog, hazard stripes
- *   default         code editor (the classic editor themes)
- *   cybercore-tech  circuit traces into the hex core
- *   mashup          base family's scene × accent family's scene, spliced diagonally
+ *   family scene    one bespoke scene per family, defined in families.js
+ *   name ending     the theme's ending adds a modifier layer on top
+ *                   (shards → cracks, vortex → spiral, phantom → haze …),
+ *                   so the 12 cards of one family never look the same
+ *   mashup          base family's scene × accent family's scene, spliced
+ *                   along a glowing diagonal seam
  *
- * Each scene is seeded from the theme name, so cards in one family share a
- * motif but never look identical. All ids are prefixed per card.
+ * Everything is seeded from the theme id, so a card always renders the same
+ * way. All <defs> ids are suffixed per card so hundreds can share a page.
  */
 window.CC_SCENE = (() => {
   const W = 160, H = 80;
-  const seedOf = str => { let h = 2166136261; for (const c of str) h = Math.imul(h ^ c.charCodeAt(0), 16777619); return h >>> 0; };
+  const f = n => (+n).toFixed(1);
+  const times = (n, fn) => Array.from({ length: n }, (_, i) => fn(i)).join('');
+  const seedOf = str => { let h = 2166136261; for (const ch of str) h = Math.imul(h ^ ch.charCodeAt(0), 16777619); return h >>> 0; };
   const rng = seed => () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
-  const c = (p, k) => `#${p[k]}`;
   const glow = s => `<filter id="gl${s}" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="1.4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>`;
-  const stars = (p, r, n = 7, maxY = 40) => Array.from({ length: n }, () => `<circle cx="${(r() * W).toFixed(1)}" cy="${(r() * maxY).toFixed(1)}" r="${(.3 + r() * .5).toFixed(2)}"/>`).join('');
+  const FAM = () => window.CC_FAMILIES || {};
 
-  const S = {
-    cybercard(p, s, r, family, id) {
-      const profiles = {
-        mashup: ['SIGNATURE MASHUP', 'KITTY PALETTE FUSION', 'hot_pink', 'cyan'],
-        'cybercore-tech': ['CYBERCORE TECH', 'GOVERNED SYSTEM', 'acid_green', 'cyan'],
-        alien: ['ALIEN SIGNAL', 'EXTRATERRESTRIAL RELAY', 'purple', 'cyan'],
-        cyberdark: ['CYBERDARK', 'NOCTURNAL SYSTEM', 'cyan', 'purple'],
-        'cyberdark-grid': ['GRID MATRIX', 'PRECISION ARCHITECTURE', 'cyan', 'white'],
-        'cyberdark-industrial': ['INDUSTRIAL CORE', 'MACHINE TELEMETRY', 'orange', 'acid_green'],
-        'cyberdark-ops': ['CYBERDARK OPS', 'TACTICAL OVERWATCH', 'red', 'cyan'],
-        cyberdyne: ['CYBERDYNE', 'DEFENSE NETWORK', 'red', 'orange'],
-        cyberpunk: ['CYBERPUNK', 'NEON UNDERCITY', 'hot_pink', 'cyan'],
-        cyborg: ['CYBORG LINK', 'AUGMENTED INTERFACE', 'acid_green', 'cyan'],
-        'dark-futurism': ['DARK FUTURISM', 'MONOLITH PROTOCOL', 'purple', 'white'],
-        'dark-skylines': ['DARK SKYLINES', 'METROPOLIS AFTER DARK', 'hot_pink', 'cyan'],
-        default: ['CLASSICS', 'CORE WORKSPACE', 'cyan', 'purple'],
-        'dystopian-frontier': ['FRONTIER ZONE', 'PERIMETER SURVIVOR', 'orange', 'acid_green'],
-        dystopian: ['DYSTOPIAN', 'HAZARD TERRITORY', 'acid_green', 'orange'],
-        futuristic: ['FUTURISTIC', 'ORBITAL SYSTEMS', 'cyan', 'white'],
-        'neon-noir': ['NEON NOIR', 'RAIN CITY NETWORK', 'hot_pink', 'cyan'],
-        neosynth: ['NEOSYNTH', 'SYNTHETIC SIGNAL', 'cyan', 'hot_pink'],
-        'night-ops': ['NIGHT OPS', 'TACTICAL COMMAND', 'cyan', 'red'],
-        'omarchy-live': ['OMARCHY LIVE', 'DESKTOP SURFACE', 'white', 'hot_pink'],
-        'plasma-core': ['PLASMA CORE', 'CONTAINED ENERGY', 'hot_pink', 'purple'],
-        'signal-cities': ['SIGNAL CITIES', 'URBAN BROADCAST', 'cyan', 'orange'],
-        'synth-industrial': ['SYNTH INDUSTRIAL', 'MECHANICAL RHYTHM', 'acid_green', 'orange'],
-        synthwave: ['SYNTHWAVE', 'RETROFUTURE SIGNAL', 'cyan', 'hot_pink'],
-        'terminal-ghost': ['TERMINAL GHOST', 'RESIDUAL PROCESS', 'acid_green', 'purple'],
-        tokyo: ['TOKYO CIRCUIT', 'ELECTRIC DISTRICT', 'hot_pink', 'cyan']
-      };
-      const [title, subtitle, primary, secondary] = profiles[family] || ['CYBERCORE', 'SYSTEM RESOURCE', 'cyan', 'purple'];
-      const label = id.replace(`${family}-`, '').replaceAll('-', ' ').toUpperCase().slice(0, 17);
-      const trace = (x, y, w, color, flip = false) => `<path d="M${x} ${y}h${w * .35}l${w * .08} ${flip ? -5 : 5}h${w * .32}l${w * .08} ${flip ? 5 : -5}h${w * .17}" fill="none" stroke="${c(p, color)}" stroke-width=".65" opacity=".9"/><circle cx="${x + w}" cy="${y}" r="1.6" fill="${c(p, color)}"/>`;
-      let motif = '';
-      if (family === 'alien') motif = `<ellipse cx="119" cy="36" rx="20" ry="8" fill="none" stroke="${c(p, primary)}" stroke-width="2"/><ellipse cx="119" cy="36" rx="10" ry="20" fill="none" stroke="${c(p, secondary)}" stroke-width="1.2" transform="rotate(-25 119 36)"/><circle cx="119" cy="36" r="4" fill="${c(p, primary)}"/>`;
-      else if (family === 'cybercore-tech') motif = `<polygon points="119,15 138,26 138,47 119,58 100,47 100,26" fill="${c(p, 'panel')}" stroke="${c(p, primary)}" stroke-width="2"/><path d="M119 20v33M105 28l28 17M133 28l-28 17" stroke="${c(p, secondary)}"/><circle cx="119" cy="36" r="5" fill="${c(p, primary)}"/>`;
-      else if (family === 'cyberdark' || family === 'cyberdark-grid') motif = `<path d="M100 20h33l10 10v19l-10 10h-33L90 49V30z" fill="${c(p, 'panel')}" stroke="${c(p, primary)}"/><path d="M101 27h26M101 33h20M101 39h28M101 45h16" stroke="${c(p, secondary)}" stroke-width="1.6"/><circle cx="137" cy="25" r="2.5" fill="${c(p, primary)}"/>`;
-      else if (family === 'cyberdark-industrial' || family === 'synth-industrial') motif = `<g fill="${c(p, primary)}">${[0,1,2,3,4].map(i => `<rect x="${99 + i * 8}" y="${57 - [12,25,18,31,21][i]}" width="5" height="${[12,25,18,31,21][i]}"/>`).join('')}</g><path d="M98 59h43" stroke="${c(p, secondary)}" stroke-width="1.2"/><circle cx="119" cy="25" r="12" fill="none" stroke="${c(p, secondary)}" stroke-width="2"/><path d="M119 13v24M107 25h24" stroke="${c(p, primary)}"/>`;
-      else if (family === 'cyborg') motif = `<path d="M102 52V29q0-13 17-13t17 13v23" fill="${c(p, 'panel')}" stroke="${c(p, primary)}" stroke-width="1.5"/><path d="M119 17v36M104 34h30" stroke="${c(p, secondary)}"/><rect x="108" y="29" width="7" height="4" fill="${c(p, primary)}"/><rect x="123" y="29" width="7" height="4" fill="${c(p, primary)}"/><path d="M108 43h22" stroke="${c(p, primary)}" stroke-width="2"/>`;
-      else if (family === 'cyberdyne') motif = `<circle cx="119" cy="36" r="22" fill="${c(p, 'panel')}" stroke="${c(p, primary)}" stroke-width="2"/><circle cx="119" cy="36" r="13" fill="none" stroke="${c(p, secondary)}" stroke-dasharray="3 2"/><path d="M119 10v13M119 49v13M93 36h13M132 36h13" stroke="${c(p, primary)}" stroke-width="2"/><circle cx="119" cy="36" r="4" fill="${c(p, primary)}"/>`;
-      else if (family === 'cyberpunk' || family === 'neon-noir') motif = `<g fill="${c(p, 'panel')}" stroke="${c(p, primary)}">${[0,1,2,3].map(i => `<rect x="${99 + i * 11}" y="${54 - [18,31,24,38][i]}" width="8" height="${[18,31,24,38][i]}"/>`).join('')}</g><path d="M100 29h13M124 23h12M102 39h10" stroke="${c(p, secondary)}" stroke-width="2"/><circle cx="137" cy="17" r="3" fill="${c(p, primary)}"/>`;
-      else if (family === 'dark-futurism') motif = `<path d="M99 58l8-34h10l5 34zM122 58l6-43h12l7 43z" fill="${c(p, 'panel')}" stroke="${c(p, primary)}"/><path d="M103 48h8M126 38h14M126 44h10" stroke="${c(p, secondary)}" stroke-width="1.4"/><circle cx="133" cy="20" r="3" fill="${c(p, primary)}"/>`;
-      else if (family === 'dark-skylines' || family === 'signal-cities') motif = `<g fill="${c(p, 'panel')}" stroke="${c(p, primary)}">${[0,1,2,3,4].map(i => `<rect x="${98 + i * 9}" y="${55 - [22,35,27,42,18][i]}" width="7" height="${[22,35,27,42,18][i]}"/>`).join('')}</g><path d="M98 58h44M119 14v26M113 20h12" stroke="${c(p, secondary)}" stroke-width="1.3"/><circle cx="119" cy="14" r="2.5" fill="${c(p, primary)}"/>`;
-      else if (family === 'default') motif = `<rect x="98" y="17" width="44" height="39" fill="${c(p, 'panel')}" stroke="${c(p, primary)}"/><path d="M104 27h9l4 4-4 4h-9M120 35h16M104 44h29M104 49h19" stroke="${c(p, secondary)}" stroke-width="1.5"/><circle cx="104" cy="21" r="2" fill="${c(p, primary)}"/>`;
-      else if (family === 'dystopian-frontier') motif = `<circle cx="127" cy="25" r="12" fill="${c(p, primary)}" opacity=".75"/><path d="M98 58l12-19 8 10 10-18 15 27z" fill="${c(p, 'panel')}" stroke="${c(p, secondary)}"/><path d="M98 61h45M103 54h7M133 49h7" stroke="${c(p, primary)}" stroke-width="1.4"/>`;
-      else if (family === 'dystopian') motif = `<path d="M98 56h44M101 56V25h11v31M116 56V17h12v39M133 56V30h8v26" fill="${c(p, 'panel')}" stroke="${c(p, primary)}"/><path d="M98 61h44M104 28h5M119 21h6M136 34h4" stroke="${c(p, secondary)}" stroke-width="1.5"/><path d="M98 65h44" stroke="${c(p, primary)}" stroke-width="3"/>`;
-      else if (family === 'futuristic') motif = `<ellipse cx="120" cy="36" rx="27" ry="9" fill="none" stroke="${c(p, primary)}" stroke-width="2" transform="rotate(-20 120 36)"/><ellipse cx="120" cy="36" rx="20" ry="6" fill="none" stroke="${c(p, secondary)}" stroke-width="1.5" transform="rotate(27 120 36)"/><circle cx="120" cy="36" r="6" fill="${c(p, primary)}"/>`;
-      else if (family === 'night-ops') motif = `<circle cx="120" cy="36" r="22" fill="${c(p, 'panel')}" stroke="${c(p, primary)}"/><path d="M120 36l17-13M120 14v44M98 36h44" stroke="${c(p, secondary)}" stroke-width="1"/><circle cx="120" cy="36" r="4" fill="${c(p, primary)}"/><path d="M101 20h10M130 52h10" stroke="${c(p, 'white')}"/>`;
-      else if (family === 'omarchy-live') motif = `<rect x="98" y="18" width="45" height="37" fill="${c(p, 'panel')}" stroke="${c(p, primary)}"/><rect x="103" y="24" width="11" height="25" fill="${c(p, primary)}" opacity=".75"/><path d="M119 26h18M119 33h13M119 40h20M119 47h10" stroke="${c(p, secondary)}" stroke-width="1.5"/><circle cx="108" cy="29" r="2" fill="${c(p, 'white')}"/>`;
-      else if (family === 'plasma-core') motif = `<circle cx="120" cy="36" r="22" fill="${c(p, primary)}" opacity=".2" filter="url(#gl${s})"/><ellipse cx="120" cy="36" rx="26" ry="8" fill="none" stroke="${c(p, primary)}" stroke-width="2"/><ellipse cx="120" cy="36" rx="8" ry="25" fill="none" stroke="${c(p, secondary)}" stroke-width="1.5"/><circle cx="120" cy="36" r="6" fill="${c(p, primary)}"/>`;
-      else if (family === 'neosynth') motif = `<path d="M98 38q7-18 14 0t14 0t14 0" fill="none" stroke="${c(p, primary)}" stroke-width="2"/><path d="M98 46q7-12 14 0t14 0t14 0" fill="none" stroke="${c(p, secondary)}" stroke-width="1.5"/><g fill="${c(p, primary)}">${[8,19,13,26,16].map((h, i) => `<rect x="${99 + i * 8}" y="${59 - h}" width="5" height="${h}"/>`).join('')}</g>`;
-      else if (family === 'synthwave') motif = `<circle cx="120" cy="34" r="15" fill="${c(p, primary)}" opacity=".8"/><path d="M106 34h28M108 29h24M111 24h18M98 51h44M105 51l-7 10M115 51l-2 10M125 51l2 10M135 51l7 10" stroke="${c(p, secondary)}" stroke-width="1.3"/>`;
-      else if (family === 'terminal-ghost') motif = `<rect x="97" y="18" width="46" height="36" fill="${c(p, 'panel')}" stroke="${c(p, primary)}"/><path d="M104 27l6 5-6 5M114 37h19M104 45l6 5-6 5M114 55h12" stroke="${c(p, secondary)}" stroke-width="1.6"/><circle cx="136" cy="24" r="2.5" fill="${c(p, primary)}"/>`;
-      else if (family === 'tokyo') motif = `<rect x="98" y="24" width="42" height="30" fill="${c(p, 'panel')}" stroke="${c(p, primary)}"/><rect x="103" y="29" width="32" height="8" fill="${c(p, primary)}"/><path d="M103 43h29M103 49h19" stroke="${c(p, secondary)}" stroke-width="1.6"/><circle cx="139" cy="18" r="3" fill="${c(p, primary)}"/>`;
-      else motif = `<rect x="101" y="20" width="38" height="32" fill="${c(p, 'panel')}" stroke="${c(p, primary)}"/><path d="M106 29h28M106 36h20M106 43h25" stroke="${c(p, secondary)}" stroke-width="1.4"/>`;
-      return `<defs><linearGradient id="cb${s}" x1="0" y1="0" x2="1" y2="1"><stop stop-color="${c(p, 'bg')}"/><stop offset=".55" stop-color="${c(p, 'panel')}"/><stop offset="1" stop-color="${c(p, primary)}" stop-opacity=".35"/></linearGradient><filter id="gl${s}" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="1.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter><pattern id="cg${s}" width="8" height="8" patternUnits="userSpaceOnUse"><path d="M8 0H0V8" fill="none" stroke="${c(p, 'line')}" stroke-width=".45"/></pattern></defs>
-        <rect width="${W}" height="${H}" fill="${c(p, 'bg')}"/><rect x="5" y="5" width="150" height="70" rx="2" fill="url(#cb${s})" stroke="${c(p, primary)}" stroke-width=".8"/><rect x="8" y="8" width="144" height="64" fill="url(#cg${s})" opacity=".7"/>
-        <path d="M5 17h20l5 5h35l5-5h80" fill="none" stroke="${c(p, primary)}" stroke-width="1.2"/><path d="M5 66h28l6-6h32l6 6h78" fill="none" stroke="${c(p, secondary)}" stroke-width=".8"/>
-        ${trace(12, 28, 58, secondary)}${trace(10, 54, 55, primary, true)}${trace(72, 12, 45, primary)}${trace(73, 67, 52, secondary, true)}
-        <text x="15" y="35" fill="${c(p, 'white')}" font-size="7" font-family="monospace" font-weight="700" letter-spacing=".8">${title}</text><text x="15" y="43" fill="${c(p, secondary)}" font-size="4.2" font-family="monospace" letter-spacing=".45">${subtitle}</text><text x="15" y="58" fill="${c(p, 'muted')}" font-size="4" font-family="monospace" letter-spacing=".8">${label}</text>
-        <rect x="15" y="62" width="45" height="2" fill="${c(p, primary)}"/><rect x="63" y="62" width="19" height="2" fill="${c(p, secondary)}"/><rect x="85" y="62" width="11" height="2" fill="${c(p, 'white')}"/>
-        ${motif}<rect x="135" y="57" width="13" height="8" rx="1" fill="${c(p, 'bg')}" stroke="${c(p, primary)}"/><text x="141.5" y="62.5" text-anchor="middle" fill="${c(p, primary)}" font-size="4.5" font-family="monospace" font-weight="700">ACTIVE</text>`;
-    },
-
-    synthwave(p, s, r) {
-      const h = 46, sx = 62 + r() * 36, rows = [50, 53, 57, 62, 69, 79], cols = [-80, -50, -25, 0, 25, 50, 80];
-      return `<defs><linearGradient id="sk${s}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${c(p, 'bg')}"/><stop offset="1" stop-color="${c(p, 'purple')}" stop-opacity=".6"/></linearGradient>
-        <linearGradient id="su${s}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${c(p, 'orange')}"/><stop offset="1" stop-color="${c(p, 'hot_pink')}"/></linearGradient>
-        <clipPath id="cl${s}"><rect width="${W}" height="${h}"/></clipPath>${glow(s)}</defs>
-        <rect width="${W}" height="${H}" fill="${c(p, 'bg')}"/><rect width="${W}" height="${h}" fill="url(#sk${s})"/>
-        <g fill="${c(p, 'white')}" opacity=".75">${stars(p, r, 8, 30)}</g>
-        <g clip-path="url(#cl${s})" filter="url(#gl${s})"><circle cx="${sx}" cy="${h}" r="23" fill="url(#su${s})"/>
-        ${[30, 35, 39, 42.5].map((y, i) => `<rect x="${sx - 30}" y="${y}" width="60" height="${1 + i * .6}" fill="${c(p, 'bg')}" opacity=".9"/>`).join('')}</g>
-        <path d="M0 ${h}L18 ${33 + r() * 6} 30 40 46 ${26 + r() * 6} 60 ${h}M100 ${h}l14-${10 + r() * 6} 10 6 16-12 20 20" fill="${c(p, 'panel')}" stroke="${c(p, 'cyan')}" stroke-width=".8"/>
-        <rect y="${h}" width="${W}" height="${H - h}" fill="${c(p, 'bg')}"/>
-        <g stroke="${c(p, 'hot_pink')}" stroke-width=".7">${rows.map(y => `<path d="M0 ${y}H${W}"/>`).join('')}${cols.map(x => `<path d="M${80 + x * .2} ${h}L${80 + x * 2.2} ${H}"/>`).join('')}</g>
-        <path d="M0 ${h}H${W}" stroke="${c(p, 'cyan')}" stroke-width="1.2" filter="url(#gl${s})"/>`;
-    },
-
-    cyberdyne(p, s, r) {
-      const cx = 92 + r() * 30, cy = 38 + r() * 8;
-      const bars = Array.from({ length: 7 }, (_, i) => `<rect x="8" y="${12 + i * 5}" width="${8 + r() * 26}" height="2" fill="${c(p, i % 3 ? 'acid_green' : 'cyan')}" opacity="${.5 + r() * .5}"/>`).join('');
-      const graph = Array.from({ length: 9 }, (_, i) => { const bh = 4 + r() * 16; return `<rect x="${8 + i * 4}" y="${72 - bh}" width="2.6" height="${bh}" fill="${c(p, i > 6 ? 'red' : 'orange')}"/>`; }).join('');
-      return `<defs>${glow(s)}<radialGradient id="ey${s}"><stop offset="0" stop-color="${c(p, 'red')}" stop-opacity=".9"/><stop offset="1" stop-color="${c(p, 'red')}" stop-opacity="0"/></radialGradient>
-        <linearGradient id="sc${s}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${c(p, 'red')}" stop-opacity="0"/><stop offset=".5" stop-color="${c(p, 'red')}" stop-opacity=".28"/><stop offset="1" stop-color="${c(p, 'red')}" stop-opacity="0"/></linearGradient>
-        <pattern id="gr${s}" width="8" height="8" patternUnits="userSpaceOnUse"><path d="M8 0H0V8" fill="none" stroke="${c(p, 'line')}" stroke-width=".5"/></pattern></defs>
-        <rect width="${W}" height="${H}" fill="${c(p, 'bg')}"/><rect width="${W}" height="${H}" fill="url(#gr${s})" opacity=".8"/>
-        <rect y="${20 + r() * 30}" width="${W}" height="12" fill="url(#sc${s})"/>
-        <circle cx="${cx}" cy="${cy}" r="20" fill="url(#ey${s})" opacity=".35"/>
-        <g fill="none" stroke="${c(p, 'red')}" filter="url(#gl${s})">
-          <circle cx="${cx}" cy="${cy}" r="21" stroke-width=".9"/>
-          <circle cx="${cx}" cy="${cy}" r="14" stroke-width=".7" stroke-dasharray="3 2"/>
-          <path d="M${cx - 30} ${cy}h12M${cx + 18} ${cy}h12M${cx} ${cy - 30}v12M${cx} ${cy + 18}v12" stroke-width=".8"/>
-          <path d="M${cx - 26} ${cy - 20}v-6h6M${cx + 20} ${cy - 26}h6v6M${cx + 26} ${cy + 20}v6h-6M${cx - 20} ${cy + 26}h-6v-6" stroke="${c(p, 'white')}" stroke-width="1"/>
-        </g>
-        <circle cx="${cx}" cy="${cy}" r="4" fill="${c(p, 'red')}" filter="url(#gl${s})"/><circle cx="${cx}" cy="${cy}" r="1.4" fill="${c(p, 'white')}"/>
-        ${bars}${graph}
-        <path d="M8 8h30" stroke="${c(p, 'red')}" stroke-width="1.6"/>
-        <path d="M${W - 30} 8h22M${W - 20} 12h12" stroke="${c(p, 'muted')}" stroke-width="1.2"/>
-        <path d="M0 ${H - 1}H${W}" stroke="${c(p, 'acid_green')}" stroke-width="1" opacity=".7"/>`;
-    },
-
-    cyberpunk(p, s, r) {
-      const far = [], near = [], win = [], signs = [];
-      for (let x = -4; x < W;) { const w = 8 + r() * 12, h = 22 + r() * 30; far.push(`<rect x="${x.toFixed(1)}" y="${(H - h).toFixed(1)}" width="${w.toFixed(1)}" height="${h.toFixed(1)}"/>`); x += w + 1; }
-      for (let x = -2; x < W;) {
-        const w = 12 + r() * 16, h = 16 + r() * 40, y = H - h;
-        near.push(`<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${w.toFixed(1)}" height="${h.toFixed(1)}"/>`);
-        if (r() > .7) near.push(`<path d="M${(x + w / 2).toFixed(1)} ${y.toFixed(1)}v-${(4 + r() * 8).toFixed(1)}"/>`);
-        for (let wy = y + 3; wy < H - 3; wy += 4) for (let wx = x + 2; wx < x + w - 2; wx += 3.2) if (r() > .62) win.push(`<rect x="${wx.toFixed(1)}" y="${wy.toFixed(1)}" width="1.6" height="1.6" fill="${c(p, ['cyan', 'orange', 'hot_pink', 'white'][(r() * 4) | 0])}" opacity="${(.35 + r() * .6).toFixed(2)}"/>`);
-        if (r() > .55) signs.push(`<rect x="${(x + 2).toFixed(1)}" y="${(y + 4 + r() * 8).toFixed(1)}" width="2.2" height="${(8 + r() * 12).toFixed(1)}" fill="${c(p, r() > .5 ? 'hot_pink' : 'cyan')}"/>`);
-        x += w + 2;
-      }
-      const rain = Array.from({ length: 34 }, () => { const x = r() * (W + 20), y = r() * H; return `<path d="M${x.toFixed(1)} ${y.toFixed(1)}l-3 7"/>`; }).join('');
-      return `<defs>${glow(s)}<linearGradient id="sk${s}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${c(p, 'bg')}"/><stop offset=".65" stop-color="${c(p, 'purple')}" stop-opacity=".55"/><stop offset="1" stop-color="${c(p, 'hot_pink')}" stop-opacity=".45"/></linearGradient></defs>
-        <rect width="${W}" height="${H}" fill="${c(p, 'bg')}"/><rect width="${W}" height="${H}" fill="url(#sk${s})"/>
-        <circle cx="${30 + r() * 100}" cy="16" r="7" fill="${c(p, 'cyan')}" opacity=".18"/>
-        <g fill="${c(p, 'panel')}" opacity=".85">${far.join('')}</g>
-        <g fill="${c(p, 'bg')}" stroke="${c(p, 'line')}" stroke-width=".5">${near.join('')}</g>
-        <g>${win.join('')}</g><g filter="url(#gl${s})">${signs.join('')}</g>
-        <g stroke="${c(p, 'white')}" stroke-width=".35" opacity=".28">${rain}</g>
-        <rect y="${H - 3}" width="${W}" height="3" fill="${c(p, 'hot_pink')}" opacity=".35"/>`;
-    },
-
-    neosynth(p, s, r) {
-      const ph = r() * 6, f1 = 2 + r() * 2;
-      const wave = (amp, freq, phase) => { let d = ''; for (let x = 0; x <= W; x += 2) { const y = 34 + Math.sin(x / W * Math.PI * freq + phase) * amp * Math.sin(x / W * Math.PI) + Math.sin(x * .35 + phase) * 2; d += `${x ? 'L' : 'M'}${x} ${y.toFixed(1)}`; } return d; };
-      const bars = Array.from({ length: 26 }, (_, i) => { const h = 3 + Math.abs(Math.sin(i * .5 + ph)) * 14 + r() * 6; return `<rect x="${3 + i * 6}" y="${(H - 2 - h).toFixed(1)}" width="4" height="${h.toFixed(1)}" fill="url(#sp${s})"/>`; }).join('');
-      const lasers = Array.from({ length: 7 }, (_, i) => `<path d="M80 -4L${(i - 3) * 40 + 80} ${H}"/>`).join('');
-      return `<defs>${glow(s)}<radialGradient id="pl${s}" cx=".5" cy=".45" r=".6"><stop offset="0" stop-color="${c(p, 'purple')}" stop-opacity=".7"/><stop offset="1" stop-color="${c(p, 'bg')}" stop-opacity="0"/></radialGradient>
-        <linearGradient id="sp${s}" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="${c(p, 'cyan')}"/><stop offset="1" stop-color="${c(p, 'acid_green')}"/></linearGradient></defs>
-        <rect width="${W}" height="${H}" fill="${c(p, 'bg')}"/><rect width="${W}" height="${H}" fill="url(#pl${s})"/>
-        <g stroke="${c(p, 'cyan')}" stroke-width=".4" opacity=".35">${lasers}</g>
-        <path d="M0 34H${W}" stroke="${c(p, 'line')}" stroke-width=".6"/>
-        <g fill="none" stroke-linejoin="round" filter="url(#gl${s})">
-          <path d="${wave(13, f1, ph)}" stroke="${c(p, 'hot_pink')}" stroke-width="1.5"/>
-          <path d="${wave(8, f1 * 1.6, ph + 1.4)}" stroke="${c(p, 'cyan')}" stroke-width="1"/>
-        </g>
-        <g opacity=".95">${bars}</g>
-        <circle cx="${20 + r() * 120}" cy="12" r="2" fill="${c(p, 'acid_green')}" filter="url(#gl${s})"/>`;
-    },
-
-    dystopian(p, s, r) {
-      const ruins = []; let x = -2;
-      while (x < W) {
-        const w = 10 + r() * 18, h = 14 + r() * 30, y = 64 - h;
-        const notch = `L${(x + w * .7).toFixed(1)} ${(y + 4 + r() * 6).toFixed(1)}L${(x + w * .45).toFixed(1)} ${(y + r() * 3).toFixed(1)}`;
-        ruins.push(`<path d="M${x.toFixed(1)} 64V${y.toFixed(1)}L${(x + w * .3).toFixed(1)} ${y.toFixed(1)}${notch}L${(x + w).toFixed(1)} ${(y + 6 + r() * 8).toFixed(1)}V64Z"/>`);
-        x += w + r() * 4;
-      }
-      const smoke = Array.from({ length: 5 }, () => `<ellipse cx="${(r() * W).toFixed(1)}" cy="${(10 + r() * 25).toFixed(1)}" rx="${(18 + r() * 20).toFixed(1)}" ry="${(4 + r() * 4).toFixed(1)}"/>`).join('');
-      return `<defs><linearGradient id="hz${s}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${c(p, 'bg')}"/><stop offset=".8" stop-color="${c(p, 'orange')}" stop-opacity=".35"/><stop offset="1" stop-color="${c(p, 'acid_green')}" stop-opacity=".25"/></linearGradient>
-        <pattern id="st${s}" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="4" height="8" fill="${c(p, 'acid_green')}"/></pattern>
-        <filter id="bl${s}"><feGaussianBlur stdDeviation="2.4"/></filter></defs>
-        <rect width="${W}" height="${H}" fill="${c(p, 'bg')}"/><rect width="${W}" height="64" fill="url(#hz${s})"/>
-        <circle cx="${40 + r() * 80}" cy="${34 + r() * 8}" r="13" fill="${c(p, 'orange')}" opacity=".55" filter="url(#bl${s})"/>
-        <g fill="${c(p, 'muted')}" opacity=".22" filter="url(#bl${s})">${smoke}</g>
-        <g fill="${c(p, 'panel')}" stroke="${c(p, 'line')}" stroke-width=".6">${ruins.join('')}</g>
-        <circle cx="${20 + r() * 120}" cy="${30 + r() * 10}" r="1.3" fill="${c(p, 'red')}"/>
-        <rect y="64" width="${W}" height="${H - 64}" fill="${c(p, 'bg')}"/>
-        <rect y="68" width="${W}" height="7" fill="url(#st${s})" opacity=".85"/>
-        <path d="M0 64H${W}" stroke="${c(p, 'orange')}" stroke-width=".8" opacity=".7"/>`;
-    },
-
-    default(p, s, r) {
-      const tok = ['hot_pink', 'cyan', 'acid_green', 'orange', 'purple', 'white', 'white'];
-      let lines = '', y = 16, indent = 0;
-      for (let i = 0; i < 10; i++, y += 6) {
-        lines += `<rect x="4" y="${y}" width="6" height="2" fill="${c(p, 'muted')}" opacity=".5"/>`;
-        let x = 16 + indent * 6;
-        const n = 2 + ((r() * 4) | 0);
-        for (let k = 0; k < n && x < 118; k++) { const w = 5 + r() * 18; lines += `<rect x="${x.toFixed(1)}" y="${y}" width="${w.toFixed(1)}" height="2.4" rx="1" fill="${c(p, tok[(r() * tok.length) | 0])}" opacity=".9"/>`; x += w + 3; }
-        indent = Math.max(0, Math.min(3, indent + ((r() * 3) | 0) - 1));
-      }
-      const mini = Array.from({ length: 22 }, (_, i) => `<rect x="134" y="${15 + i * 2.8}" width="${(4 + r() * 16).toFixed(1)}" height="1.2" fill="${c(p, tok[i % tok.length])}" opacity=".45"/>`).join('');
-      return `<rect width="${W}" height="${H}" fill="${c(p, 'bg')}"/>
-        <rect width="${W}" height="10" fill="${c(p, 'panel')}"/><path d="M0 10H${W}" stroke="${c(p, 'line')}"/>
-        <circle cx="7" cy="5" r="1.8" fill="${c(p, 'red')}"/><circle cx="13" cy="5" r="1.8" fill="${c(p, 'orange')}"/><circle cx="19" cy="5" r="1.8" fill="${c(p, 'acid_green')}"/>
-        <rect x="28" y="2" width="30" height="8" fill="${c(p, 'bg')}"/><rect x="31" y="5" width="20" height="2" fill="${c(p, 'white')}" opacity=".7"/>
-        <rect x="0" y="10" width="13" height="${H - 10}" fill="${c(p, 'panel')}" opacity=".6"/>
-        <rect x="13" y="${16 + ((r() * 9) | 0) * 6 - 2}" width="117" height="6" fill="${c(p, 'line')}" opacity=".45"/>
-        ${lines}${mini}
-        <path d="M130 10V${H}" stroke="${c(p, 'line')}"/>
-        <rect x="${40 + r() * 60}" y="${16 + ((r() * 9) | 0) * 6 - 1}" width="1.4" height="4.4" fill="${c(p, 'acid_green')}"/>
-        <rect y="${H - 6}" width="${W}" height="6" fill="${c(p, 'purple')}" opacity=".8"/>`;
-    },
-
-    generic(p, s, r) {
-      const points = Array.from({ length: 9 }, (_, i) => `${(r() * W).toFixed(1)},${(18 + r() * 48).toFixed(1)}`).join(' ');
-      const beams = Array.from({ length: 7 }, (_, i) => {
-        const x = 8 + i * 24 + r() * 12;
-        return `<path d="M80 38L${x.toFixed(1)} ${H}" stroke="${c(p, i % 2 ? 'cyan' : 'hot_pink')}" stroke-width=".7" opacity=".7"/>`;
-      }).join('');
-      const bars = Array.from({ length: 12 }, (_, i) => {
-        const h = 5 + r() * 24;
-        return `<rect x="${8 + i * 12}" y="${70 - h}" width="6" height="${h.toFixed(1)}" fill="${c(p, ['acid_green', 'purple', 'orange', 'cyan'][i % 4])}" opacity=".8"/>`;
-      }).join('');
-      return `<defs><linearGradient id="gn${s}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${c(p, 'bg')}"/><stop offset=".55" stop-color="${c(p, 'purple')}" stop-opacity=".55"/><stop offset="1" stop-color="${c(p, 'hot_pink')}" stop-opacity=".35"/></linearGradient>${glow(s)}</defs>
-        <rect width="${W}" height="${H}" fill="${c(p, 'bg')}"/><rect width="${W}" height="${H}" fill="url(#gn${s})"/>
-        <path d="M0 18H${W}M0 38H${W}M0 58H${W}" stroke="${c(p, 'line')}" stroke-width=".5"/>
-        <polyline points="${points}" fill="none" stroke="${c(p, 'white')}" stroke-width=".7" opacity=".65"/>
-        <g>${beams}</g><g>${bars}</g>
-        <polygon points="80,20 98,38 80,56 62,38" fill="${c(p, 'panel')}" stroke="${c(p, 'cyan')}" stroke-width="1" filter="url(#gl${s})"/>
-        <circle cx="80" cy="38" r="7" fill="none" stroke="${c(p, 'hot_pink')}" stroke-width="1.2"/><circle cx="80" cy="38" r="2" fill="${c(p, 'acid_green')}"/>`;
-    },
-
-    semantic(p, s, r, family) {
-      const accent = { alien: 'purple', cyberdark: 'cyan', 'cyberdark-grid': 'cyan', 'cyberdark-industrial': 'orange', 'cyberdark-ops': 'red', cyborg: 'acid_green', 'dark-futurism': 'purple', 'dark-skylines': 'hot_pink', 'dystopian-frontier': 'orange', futuristic: 'cyan', 'neon-noir': 'hot_pink', 'night-ops': 'cyan', 'omarchy-live': 'white', 'plasma-core': 'hot_pink', 'signal-cities': 'cyan', 'synth-industrial': 'acid_green', 'terminal-ghost': 'acid_green', tokyo: 'hot_pink' }[family] || 'cyan';
-      const a = c(p, accent), b = c(p, family === 'dark-skylines' || family === 'neon-noir' || family === 'tokyo' ? 'purple' : 'panel');
-      let motif = '';
-      if (family === 'alien') {
-        motif = `<g fill="none" stroke="${a}" filter="url(#gl${s})"><circle cx="80" cy="38" r="23"/><ellipse cx="80" cy="38" rx="38" ry="10" transform="rotate(-18 80 38)"/><circle cx="80" cy="38" r="5" stroke="${c(p, 'white')}"/></g><g fill="${a}">${Array.from({ length: 9 }, () => `<circle cx="${(r() * W).toFixed(1)}" cy="${(8 + r() * 26).toFixed(1)}" r="1"/>`).join('')}</g>`;
-      } else if (family === 'cyberdark') {
-        motif = `<g fill="none" stroke="${a}" filter="url(#gl${s})"><path d="M80 8L137 25L122 67L80 76L38 67L23 25Z"/><path d="M80 8V76M23 25L137 25M38 67L122 67M23 25L122 67M137 25L38 67"/></g><polygon points="80,22 96,38 80,54 64,38" fill="${b}" stroke="${c(p, 'white')}"/><circle cx="80" cy="38" r="4" fill="${a}"/>`;
-      } else if (family === 'cyberdark-grid') {
-        motif = `<g stroke="${a}" fill="none" opacity=".8"><path d="M0 18H${W}M0 34H${W}M0 52H${W}M0 68H${W}"/><path d="M80 18L${W} 68M80 18L0 68M80 18V68"/><polygon points="80,20 103,38 80,56 57,38" stroke="${c(p, 'white')}"/></g><circle cx="80" cy="38" r="5" fill="${a}" filter="url(#gl${s})"/>`;
-      } else if (family === 'futuristic') {
-        motif = `<g fill="none" stroke="${a}" filter="url(#gl${s})"><ellipse cx="80" cy="38" rx="58" ry="18" transform="rotate(-18 80 38)"/><ellipse cx="80" cy="38" rx="42" ry="11" transform="rotate(32 80 38)"/><circle cx="80" cy="38" r="12" stroke="${c(p, 'white')}"/></g><circle cx="80" cy="38" r="5" fill="${a}"/><path d="M8 68H152" stroke="${c(p, 'white')}"/>`;
-      } else if (family === 'cyberdark-industrial') {
-        motif = `<g fill="${a}" opacity=".8">${Array.from({ length: 9 }, (_, i) => `<rect x="${10 + i * 17}" y="${58 - r() * 25}" width="9" height="${8 + r() * 25}"/>`).join('')}</g><g stroke="${c(p, 'white')}" fill="none"><path d="M0 58H${W}"/><circle cx="80" cy="33" r="15"/><path d="M80 18V48M65 33H95"/></g>`;
-      } else if (family === 'synth-industrial') {
-        const wave = Array.from({ length: 17 }, (_, i) => `${i * 10},${38 + Math.sin(i * .9 + r()) * 13}`).join(' ');
-        motif = `<polyline points="${wave}" fill="none" stroke="${a}" stroke-width="2" filter="url(#gl${s})"/><g fill="${c(p, 'white')}" opacity=".8">${Array.from({ length: 12 }, (_, i) => `<rect x="${8 + i * 12}" y="${60 - (i % 4) * 7}" width="6" height="${8 + (i % 4) * 7}"/>`).join('')}</g><circle cx="80" cy="38" r="14" fill="none" stroke="${c(p, 'orange')}" stroke-width="3"/><path d="M80 24V52M66 38H94" stroke="${c(p, 'orange')}"/>`;
-      } else if (family === 'cyberdark-ops') {
-        motif = `<g fill="none" stroke="${a}" filter="url(#gl${s})"><circle cx="80" cy="38" r="24"/><circle cx="80" cy="38" r="11" stroke-dasharray="3 2"/><path d="M80 7V69M48 38H112M58 16L102 60M102 16L58 60"/></g><path d="M80 38L108 23" stroke="${c(p, 'white')}" stroke-width="2"/><circle cx="80" cy="38" r="3" fill="${a}"/>`;
-      } else if (family === 'night-ops') {
-        motif = `<rect x="15" y="12" width="130" height="54" fill="${b}" stroke="${a}"/><path d="M80 39L121 22A45 45 0 0 1 80 64A45 45 0 0 1 39 22Z" fill="none" stroke="${a}"/><path d="M80 39L121 22M80 39V13M80 39H36" stroke="${c(p, 'white')}"/><circle cx="80" cy="39" r="4" fill="${a}" filter="url(#gl${s})"/><path d="M22 20H48M112 58H138" stroke="${c(p, 'white')}"/>`;
-      } else if (family === 'cyborg') {
-        motif = `<path d="M54 63V30Q54 12 80 12T106 30V63" fill="${b}" stroke="${a}"/><path d="M80 14V62M57 37H103" stroke="${c(p, 'white')}"/><g fill="${a}"><rect x="63" y="29" width="10" height="4"/><rect x="87" y="29" width="10" height="4"/><circle cx="68" cy="31" r="2"/><circle cx="92" cy="31" r="2"/></g><path d="M64 48H96M70 54H90" stroke="${a}" stroke-width="2"/>`;
-      } else if (family === 'dark-futurism') {
-        motif = `<g fill="${b}" stroke="${a}"><path d="M14 68L25 14H44L51 68Z"/><path d="M58 68L68 7H91L101 68Z"/><path d="M105 68L116 22H139L151 68Z"/></g><path d="M0 69H${W}" stroke="${c(p, 'white')}"/><circle cx="80" cy="24" r="3" fill="${a}"/>`;
-      } else if (family === 'dark-skylines') {
-        const buildings = Array.from({ length: 12 }, (_, i) => { const x = i * 14, h = 16 + r() * 35; return `<rect x="${x}" y="${68 - h}" width="11" height="${h}" fill="${b}" stroke="${a}" stroke-width=".5"/><path d="M${x + 3} ${72 - h}v${h - 6}M${x + 7} ${72 - h}v${h - 6}" stroke="${a}" stroke-width="1"/>`; }).join('');
-        motif = `<g>${buildings}</g><path d="M0 69H${W}" stroke="${c(p, 'white')}"/><path d="M80 68V15M70 23H90" stroke="${a}" filter="url(#gl${s})"/><circle cx="80" cy="15" r="3" fill="${a}"/>`;
-      } else if (family === 'signal-cities') {
-        motif = `<g fill="${b}" stroke="${a}"><path d="M20 68L31 42L42 68Z"/><path d="M58 68L72 25L86 68Z"/><path d="M103 68L116 35L129 68Z"/></g><g fill="none" stroke="${a}" filter="url(#gl${s})"><path d="M72 25Q72 8 110 12T145 30"/><path d="M72 25Q72 4 33 16T8 36"/></g><circle cx="72" cy="25" r="3" fill="${c(p, 'white')}"/>`;
-      } else if (family === 'tokyo') {
-        motif = `<g fill="${b}" stroke="${a}"><rect x="12" y="20" width="34" height="42"/><rect x="54" y="12" width="38" height="50"/><rect x="100" y="25" width="48" height="37"/></g><g fill="${a}"><rect x="17" y="27" width="24" height="7"/><rect x="59" y="20" width="28" height="9"/><rect x="105" y="33" width="36" height="8"/></g><path d="M0 68H${W}M18 68L80 45L144 68" stroke="${c(p, 'white')}"/><circle cx="80" cy="8" r="4" fill="${a}" filter="url(#gl${s})"/>`;
-      } else if (family === 'dystopian-frontier') {
-        motif = `<circle cx="108" cy="30" r="17" fill="${a}" opacity=".7" filter="url(#gl${s})"/><path d="M0 64L22 42L38 58L61 34L83 62L106 47L127 60L151 38L${W} 62V70H0Z" fill="${b}" stroke="${a}"/><path d="M0 72H${W}M18 72l10-8M132 72l-8-10" stroke="${c(p, 'white')}"/>`;
-      } else if (family === 'neon-noir') {
-        motif = `<rect x="20" y="10" width="100" height="55" rx="2" fill="${b}" stroke="${a}"/><path d="M28 20H112M28 30H112M28 40H112M28 50H112" stroke="${a}" opacity=".45"/><path d="M30 66L45 18M55 66L68 18M82 66L75 18M106 66L91 18" stroke="${c(p, 'white')}" opacity=".55"/><circle cx="80" cy="32" r="7" fill="${a}" filter="url(#gl${s})"/>`;
-      } else if (family === 'omarchy-live') {
-        motif = `<rect x="12" y="12" width="136" height="53" rx="2" fill="${b}" stroke="${a}"/><rect x="18" y="18" width="34" height="41" fill="${c(p, 'bg')}" stroke="${a}"/><rect x="58" y="18" width="84" height="7" fill="${a}" opacity=".8"/><rect x="58" y="31" width="55" height="5" fill="${c(p, 'white')}" opacity=".7"/><rect x="58" y="42" width="70" height="5" fill="${a}" opacity=".55"/><circle cx="29" cy="29" r="5" fill="${a}"/><path d="M22 48H44" stroke="${c(p, 'white')}"/>`;
-      } else if (family === 'plasma-core') {
-        motif = `<defs><radialGradient id="pl${s}"><stop stop-color="${a}"/><stop offset=".35" stop-color="${c(p, 'purple')}"/><stop offset="1" stop-color="${c(p, 'bg')}" stop-opacity="0"/></radialGradient></defs><circle cx="80" cy="38" r="35" fill="url(#pl${s})"/><g fill="none" stroke="${a}" filter="url(#gl${s})"><ellipse cx="80" cy="38" rx="38" ry="12"/><ellipse cx="80" cy="38" rx="12" ry="38"/><circle cx="80" cy="38" r="7" stroke="${c(p, 'white')}"/></g>`;
-      } else if (family === 'terminal-ghost') {
-        motif = `<rect x="10" y="12" width="140" height="56" fill="${b}" stroke="${a}"/><path d="M20 25l8 6-8 6M34 37H68M20 48l8 6-8 6M34 60H84" stroke="${a}" stroke-width="2"/><circle cx="132" cy="23" r="4" fill="${a}" filter="url(#gl${s})"/><path d="M112 48h24M112 55h16" stroke="${c(p, 'white')}"/>`;
-      } else {
-        motif = `<g stroke="${a}" fill="none"><path d="M0 58H${W}M0 66H${W}M80 18V70"/><path d="M80 18L20 70M80 18L140 70"/><circle cx="80" cy="32" r="10" fill="${b}"/></g>`;
-      }
-      return `<defs>${glow(s)}<pattern id="sg${s}" width="8" height="8" patternUnits="userSpaceOnUse"><path d="M8 0H0V8" fill="none" stroke="${c(p, 'line')}" stroke-width=".4"/></pattern></defs><rect width="${W}" height="${H}" fill="${c(p, 'bg')}"/><rect width="${W}" height="${H}" fill="url(#sg${s})"/>${motif}`;
-    },
-
-    'cybercore-tech'(p, s) {
-      const cx = 80, cy = 40, R = 15, cols = ['cyan', 'acid_green', 'orange', 'red', 'hot_pink', 'purple'];
-      const hex = (rad) => Array.from({ length: 6 }, (_, i) => { const a = Math.PI / 3 * i - Math.PI / 2; return `${(cx + rad * Math.cos(a)).toFixed(1)},${(cy + rad * Math.sin(a)).toFixed(1)}`; }).join(' ');
-      const arcs = cols.map((k, i) => { const a0 = Math.PI / 3 * i - Math.PI / 2 + .12, a1 = a0 + Math.PI / 3 - .24, rr = R + 6; return `<path d="M${(cx + rr * Math.cos(a0)).toFixed(1)} ${(cy + rr * Math.sin(a0)).toFixed(1)}A${rr} ${rr} 0 0 1 ${(cx + rr * Math.cos(a1)).toFixed(1)} ${(cy + rr * Math.sin(a1)).toFixed(1)}" stroke="${c(p, k)}"/>`; }).join('');
-      const traces = [['M58 40H34V18H10', 'cyan'], ['M58 34H44V8H22', 'purple'], ['M58 46H40V66H8', 'hot_pink'], ['M102 40H128V60H152', 'acid_green'], ['M102 34H118V12H150', 'orange'], ['M102 46H112V72H140', 'red']];
-      return `<defs>${glow(s)}<pattern id="gr${s}" width="10" height="10" patternUnits="userSpaceOnUse"><circle cx="5" cy="5" r=".5" fill="${c(p, 'line')}"/></pattern></defs>
-        <rect width="${W}" height="${H}" fill="${c(p, 'bg')}"/><rect width="${W}" height="${H}" fill="url(#gr${s})"/>
-        <g fill="none" stroke-width="1" filter="url(#gl${s})">${traces.map(([d, k]) => `<path d="${d}" stroke="${c(p, k)}"/>`).join('')}</g>
-        ${traces.map(([d, k]) => { const pts = d.match(/[\d.]+/g); return `<rect x="${pts[pts.length - 2] - 1.6}" y="${pts[pts.length - 1] - 1.6}" width="3.2" height="3.2" fill="${c(p, k)}"/>`; }).join('')}
-        <polygon points="${hex(R + 12)}" fill="none" stroke="${c(p, 'hot_pink')}" stroke-width="1.2" filter="url(#gl${s})"/>
-        <g fill="none" stroke-width="2.2" stroke-linecap="round">${arcs}</g>
-        <polygon points="${hex(R - 3)}" fill="${c(p, 'panel')}" stroke="${c(p, 'white')}" stroke-width=".8"/>
-        <path d="M${cx + 4.6} ${cy - 4.6}a6.5 6.5 0 1 0 0 9.2" fill="none" stroke="${c(p, 'white')}" stroke-width="2.4"/>
-        <rect x="${cx - 1.5}" y="${cy - 1.5}" width="3" height="3" fill="${c(p, 'acid_green')}"/>`;
+  /* ---------- the name-ending rule ----------
+     Each token of a theme's ending (the part after the family name) is matched
+     against these patterns; a card gets at most two modifiers plus an optional
+     horizon shift. Endings that match nothing get one modifier picked from the
+     seed, so even a one-off name still differs from its siblings. */
+  const RULES = [
+    ['crack', /^(shards?|shrapnel|cracked|broken|ruin|fallout|gridfall)$/],
+    ['spiral', /^(vortex|singularity|cascade|helix|cyclone)$/],
+    ['phantom', /^(phantom|ghost|spectre|specter|shadow|mirage|wraith)$/],
+    ['glitch', /^(glitch|cipher|static|logic|corrupt)$/],
+    ['streak', /^(drift|flux|drive|cruise|transit|outrun|nightrun|wind|run)$/],
+    ['echo', /^(echo|array|delta|lattice|mirror)$/],
+    ['pulse', /^(pulse|signal|beacon|wave|beam|relay)$/],
+    ['nodes', /^(nexus|quantum|neural|network|link|circuit|grid|node)$/],
+    ['bits', /^(bitstream|bitrate|bit|binary|data|t800|machine|system|token)$/],
+    ['prompt', /^(terminal|kernel|daemon|hacker|mainframe|command|shell|tty)$/],
+    ['void', /^(void|blackout|null|midnight|deep|black|abyss)$/],
+    ['prism', /^(prismatic|neon|aurora|ultraviolet|blacklight|glow|lumen|afterglow|afterlight)$/],
+    ['speed', /^(overdrive|overclock|redline|flare|spark|nova|laser|hyperion)$/],
+    ['frost', /^(subzero|cryon|ice|arctic|frost|glacier)$/],
+    ['stars', /^(astral|ether|orbital|space|lunar|solar|ion|cosmic|star)$/],
+    ['scan', /^(analog|retro|vinyl|cassette|arcade|crt|tape)$/],
+    ['core', /^(core|prime|alpha|plasma|heart|forge|reactor)$/],
+    ['wire', /^(cyber|synthetic|vector|chrome|steel|titanium|iron|wire|wired|servo)$/],
+    ['hex', /^(hex|hexa|cell)$/],
+    ['smog', /^(smog|ash|ashfall|dust|dustline|wasteland|smoke|rot|quarantine|ward|sector|slum|ration|rebel|exile|scarcity)$/],
+    ['rain', /^(rain|rainline|storm|noir)$/]
+  ];
+  const HORIZON = [['high', /^(zenith|apex|sky|spire|summit|high)$/], ['low', /^(horizon|dawn|sunset|dusk|evening|low)$/]];
+  const FALLBACK = ['echo', 'stars', 'nodes', 'scan', 'prism', 'streak', 'pulse', 'wire', 'hex', 'core'];
+  function modsFor(id, family, r) {
+    const ending = family && id.startsWith(`${family}-`) ? id.slice(family.length + 1) : (family === id ? '' : id);
+    const tokens = ending.split('-').filter(Boolean);
+    const mods = [];
+    let horizon = null;
+    for (const t of tokens) {
+      for (const [name, re] of HORIZON) if (re.test(t)) horizon = name;
+      for (const [name, re] of RULES) if (re.test(t) && !mods.includes(name) && mods.length < 2) mods.push(name);
     }
+    if (!mods.length && !horizon) mods.push(FALLBACK[Math.floor(r() * FALLBACK.length)]);
+    return { mods, horizon };
+  }
+
+  const OVERLAY = {
+    crack(k) {
+      const x = 20 + k.r() * 120, y = 10 + k.r() * 60;
+      return `<g stroke="${k.c('white')}" stroke-width=".6" fill="none" opacity=".85">${times(5, () => { let d = `M${f(x)} ${f(y)}`, cx = x, cy = y; const a = k.r() * Math.PI * 2; for (let i = 0; i < 4; i++) { cx += Math.cos(a + (k.r() - .5)) * (6 + k.r() * 8); cy += Math.sin(a + (k.r() - .5)) * (6 + k.r() * 8); d += `L${f(cx)} ${f(cy)}`; } return `<path d="${d}"/>`; })}</g>`;
+    },
+    spiral(k) {
+      const cx = 30 + k.r() * 100, cy = 20 + k.r() * 40; let d = '';
+      for (let t = 0; t < 5 * Math.PI; t += .25) { const r = 1.2 * Math.exp(.2 * t); d += `${t ? 'L' : 'M'}${f(cx + Math.cos(t) * r * 1.6)} ${f(cy + Math.sin(t) * r)}`; }
+      return `<path d="${d}" fill="none" stroke="${k.A}" stroke-width=".7" opacity=".55" ${k.gl}/>`;
+    },
+    phantom(k) { return `<g fill="${k.c('white')}" opacity=".1">${times(5, () => `<ellipse cx="${f(k.r() * W)}" cy="${f(k.r() * H)}" rx="${f(20 + k.r() * 26)}" ry="${f(4 + k.r() * 5)}"/>`)}</g>`; },
+    glitch(k) { return times(4, i => `<rect x="${f(k.r() * W * .6)}" y="${f(k.r() * H)}" width="${f(16 + k.r() * 50)}" height="${f(.6 + k.r() * 1.8)}" fill="${i % 2 ? k.c('hot_pink') : k.c('cyan')}" opacity=".5" style="mix-blend-mode:screen"/>`); },
+    streak(k) { return `<g stroke="${k.c('white')}" stroke-width=".5" opacity=".28">${times(9, () => { const x = k.r() * W, y = k.r() * H, l = 10 + k.r() * 24; return `<path d="M${f(x)} ${f(y)}l${f(l)} ${f(-l * .35)}"/>`; })}</g>`; },
+    echo(k) { const x = k.r() * W, y = k.r() * H; return `<g fill="none" stroke="${k.A}">${times(4, i => `<circle cx="${f(x)}" cy="${f(y)}" r="${8 + i * 9}" opacity="${f(.5 - i * .11)}" stroke-width=".7"/>`)}</g>`; },
+    pulse(k) { const x = 20 + k.r() * 120, y = 14 + k.r() * 50; return `<g fill="none" stroke="${k.B}" ${k.gl}><circle cx="${f(x)}" cy="${f(y)}" r="3" fill="${k.B}"/><circle cx="${f(x)}" cy="${f(y)}" r="8" opacity=".6"/><circle cx="${f(x)}" cy="${f(y)}" r="14" opacity=".3"/></g>`; },
+    nodes(k) { const pts = Array.from({ length: 6 }, () => [k.r() * W, k.r() * H]); return `<g stroke="${k.A}" stroke-width=".4" opacity=".55">${pts.map(([x, y], i) => i ? `<path d="M${f(x)} ${f(y)}L${f(pts[i - 1][0])} ${f(pts[i - 1][1])}"/>` : '').join('')}</g><g fill="${k.A}">${pts.map(([x, y]) => `<circle cx="${f(x)}" cy="${f(y)}" r="1.3"/>`).join('')}</g>`; },
+    bits(k) { return `<g font-family="monospace" font-size="3.6" fill="${k.A}" opacity=".6">${times(14, i => `<text x="${W - 7}" y="${6 + i * 5.4}">${k.r() < .5 ? 0 : 1}${k.r() < .5 ? 0 : 1}</text>`)}</g>`; },
+    prompt(k) { return `<rect x="${W - 26}" y="${H - 12}" width="22" height="9" rx="1" fill="${k.c('bg')}" stroke="${k.A}" stroke-width=".6"/><text x="${W - 23}" y="${H - 5.5}" font-family="monospace" font-size="5.5" fill="${k.A}">&gt;_</text>`; },
+    void(k) { k.def(`<radialGradient id="${k.id('vg')}"><stop offset=".45" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".7"/></radialGradient>`); return `<rect width="${W}" height="${H}" fill="url(#${k.id('vg')})"/>`; },
+    prism(k) { k.def(`<linearGradient id="${k.id('pr')}" x1="0" x2="1"><stop stop-color="${k.c('hot_pink')}"/><stop offset=".25" stop-color="${k.c('orange')}"/><stop offset=".5" stop-color="${k.c('acid_green')}"/><stop offset=".75" stop-color="${k.c('cyan')}"/><stop offset="1" stop-color="${k.c('purple')}"/></linearGradient>`); return `<rect width="${W}" height="1.6" fill="url(#${k.id('pr')})" ${k.gl}/><rect y="${H - 1.6}" width="${W}" height="1.6" fill="url(#${k.id('pr')})" opacity=".7"/><rect width="${W}" height="${H}" fill="url(#${k.id('pr')})" opacity=".07"/>`; },
+    speed(k) { return `<g stroke="${k.B}" stroke-width=".6">${times(8, () => { const y = k.r() * H, l = 14 + k.r() * 40; return `<path d="M0 ${f(y)}h${f(l)}" opacity="${f(.25 + k.r() * .4)}"/>`; })}</g>`; },
+    frost(k) {
+      const corner = (x, y, sx, sy) => `<g stroke="${k.c('white')}" stroke-width=".55" fill="none" opacity=".75">${times(5, i => { const l = 6 + k.r() * 12, a = (i / 4) * Math.PI / 2; const mx = x + Math.cos(a) * l * .55 * sx, my = y + Math.sin(a) * l * .55 * sy; return `<path d="M${x} ${y}L${f(x + Math.cos(a) * l * sx)} ${f(y + Math.sin(a) * l * sy)}M${f(mx)} ${f(my)}l${f(3 * sx)} ${f(-2 * sy)}"/>`; })}</g>`;
+      return corner(0, 0, 1, 1) + corner(W, H, -1, -1);
+    },
+    stars(k) { return `<g fill="${k.c('white')}">${times(14, () => `<circle cx="${f(k.r() * W)}" cy="${f(k.r() * H * .7)}" r="${(.3 + k.r() * .5).toFixed(2)}" opacity="${(.4 + k.r() * .6).toFixed(2)}"/>`)}</g>`; },
+    scan(k) { k.def(`<pattern id="${k.id('sl')}" width="2" height="2" patternUnits="userSpaceOnUse"><rect width="2" height="1" fill="#000" opacity=".28"/></pattern>`); return `<rect width="${W}" height="${H}" fill="url(#${k.id('sl')})"/>`; },
+    core(k) { k.def(`<radialGradient id="${k.id('cr')}"><stop stop-color="${k.c('white')}"/><stop offset=".35" stop-color="${k.A}" stop-opacity=".8"/><stop offset="1" stop-color="${k.A}" stop-opacity="0"/></radialGradient>`); return `<circle cx="${f(24 + k.r() * 112)}" cy="${f(14 + k.r() * 52)}" r="9" fill="url(#${k.id('cr')})"/>`; },
+    wire(k) { return `<g stroke="${k.A}" stroke-width=".3" opacity=".3">${times(9, i => `<path d="M${i * 20} 0V${H}"/>`)}${times(5, i => `<path d="M0 ${i * 20}H${W}"/>`)}</g>`; },
+    hex(k) { k.def(`<pattern id="${k.id('hx')}" width="10" height="17.3" patternUnits="userSpaceOnUse"><path d="M5 0l5 2.9v5.8L5 11.5 0 8.7V2.9ZM5 11.5v5.8" fill="none" stroke="${k.A}" stroke-width=".4"/></pattern>`); return `<rect width="${W}" height="${H}" fill="url(#${k.id('hx')})" opacity=".35"/>`; },
+    smog(k) { return `<g fill="${k.c('muted')}" opacity=".22">${times(5, () => `<ellipse cx="${f(k.r() * W)}" cy="${f(k.r() * H)}" rx="${f(20 + k.r() * 24)}" ry="${f(3 + k.r() * 4)}"/>`)}</g>`; },
+    rain(k) { return `<g stroke="${k.c('white')}" stroke-width=".35" opacity=".45">${times(26, () => { const x = k.r() * (W + 10), y = k.r() * H; return `<path d="M${f(x)} ${f(y)}l-1.4 5"/>`; })}</g>`; }
   };
 
-  function inner(family, p, s, r) {
-    return S[family] ? S[family](p, s, r) : S.semantic(p, s, r, family);
+  /* ---------- scene context ---------- */
+  const ALIAS = { acid: 'acid_green', pink: 'hot_pink' };
+  function context(id, p, family, s, r) {
+    const fam = FAM()[family] || FAM().default;
+    const defs = [];
+    const c = key => `#${p[ALIAS[key] || key] || p.white || 'ffffff'}`;
+    const { mods, horizon } = modsFor(id, family, r);
+    return {
+      c, r, s, defs, mods, fam,
+      A: c(fam?.a || 'cyan'), B: c(fam?.b || 'purple'),
+      hz: horizon === 'high' ? 44 : horizon === 'low' ? 62 : 56,
+      id: name => `${name}${s}`,
+      def: svg => defs.push(svg),
+      gl: `filter="url(#gl${s})"`
+    };
+  }
+  // One family's scene + its name-ending overlays, as an inner SVG fragment.
+  function paint(id, p, family, s) {
+    const r = rng(seedOf(id + s));
+    const k = context(id, p, family, s, r);
+    if (!k.fam) return { defs: '', body: `<rect width="${W}" height="${H}" fill="${k.c('bg')}"/>` };
+    const scene = k.fam.scene(k);
+    const phantom = k.mods.includes('phantom');
+    const overlays = k.mods.map(m => OVERLAY[m]?.(k) || '').join('');
+    const body = `<rect width="${W}" height="${H}" fill="${k.c('bg')}"/><g${phantom ? ' opacity=".62"' : ''}>${scene}</g>${overlays}`;
+    return { defs: glow(s) + k.defs.join(''), body };
   }
 
   /* scene(id, palette, family, blend?) → <svg> string.
      blend = { baseFamily, accentFamily } for mashups. */
   return function scene(id, p, family, blend) {
     const s = id.replace(/[^a-z0-9]/gi, '');
-    const r = rng(seedOf(id));
-    let body;
     if (blend) {
-      body = S.cybercard(p, s, r, 'mashup', id);
-    } else if (['cybercore-tech', 'alien', 'cyberdark', 'cyberdark-grid', 'cyberdark-industrial', 'cyberdark-ops', 'cyberdyne', 'cyberpunk', 'cyborg', 'dark-futurism', 'dark-skylines', 'default', 'dystopian', 'dystopian-frontier', 'futuristic', 'neon-noir', 'neosynth', 'night-ops', 'omarchy-live', 'plasma-core', 'signal-cities', 'synth-industrial', 'synthwave', 'terminal-ghost', 'tokyo'].includes(family)) {
-      body = S.cybercard(p, s, r, family, id);
-    } else body = inner(family, p, s, r);
-    return `<svg class="scene" viewBox="0 0 ${W} ${H}" aria-hidden="true">${body}</svg>`;
+      const base = paint(id, p, blend.baseFamily, `${s}a`), accent = paint(id, p, blend.accentFamily, `${s}b`);
+      const seam = 'M104 0L56 80';
+      return `<svg class="scene" viewBox="0 0 ${W} ${H}" aria-hidden="true"><defs>${base.defs}${accent.defs}${glow(`${s}m`)}<clipPath id="L${s}"><path d="M0 0H104L56 80H0Z"/></clipPath><clipPath id="R${s}"><path d="M104 0H${W}V${H}H56Z"/></clipPath></defs>
+        <g clip-path="url(#L${s})">${base.body}</g><g clip-path="url(#R${s})">${accent.body}</g><path d="${seam}" stroke="#${p.white}" stroke-width="1.6" filter="url(#gl${s}m)"/><path d="${seam}" stroke="#${p.hot_pink}" stroke-width=".6"/></svg>`;
+    }
+    const known = FAM()[family] ? family : 'default';
+    const { defs, body } = paint(id, p, known, s);
+    return `<svg class="scene" viewBox="0 0 ${W} ${H}" aria-hidden="true"><defs>${defs}</defs>${body}</svg>`;
   };
 })();

@@ -23,38 +23,15 @@
     acid_green: 'ACID', hot_pink: 'HOT PINK', purple: 'PURPLE', cyan: 'CYAN', orange: 'ORANGE', red: 'RED'
   };
   const FALLBACK = { bg: '09080f', white: 'f0f0f2', acid_green: '39ff33', hot_pink: 'ff147f', purple: '8a22e2', cyan: '00e5ff', orange: 'ff9000', red: 'f1142d', panel: '16151f', line: '32303e', muted: '807f8b' };
-  const LABELS = { mashup: 'SIGNATURE MASHUPS', 'cybercore-tech': 'CYBERCORE TECH / MASTER MIX', cyberdyne: 'CYBERDYNE', cyberpunk: 'CYBERPUNK', default: 'DEFAULT / CLASSICS', dystopian: 'DYSTOPIAN', neosynth: 'NEOSYNTH', synthwave: 'SYNTHWAVE' };
-  const SHORT = { mashup: 'MASHUPS', 'cybercore-tech': 'MASTER', cyberdyne: 'CYBERDYNE', cyberpunk: 'CYBERPUNK', default: 'CLASSICS', dystopian: 'DYSTOPIAN', neosynth: 'NEOSYNTH', synthwave: 'SYNTHWAVE' };
-  const FAMILY_COLORS = {
-    alien: '#9b7cff', 'cybercore-tech': '#39ff33', cyberdark: '#00e5ff', 'cyberdark-grid': '#4cc9f0',
-    'cyberdark-industrial': '#ff9d3d', 'cyberdark-ops': '#ff334f', cyberdyne: '#ff1f3d', cyberpunk: '#ff0055',
-    cyborg: '#c6ff00', 'dark-futurism': '#bf8cff', 'dark-skylines': '#7c83ff', default: '#7dcfff',
-    dystopian: '#d4e157', 'dystopian-frontier': '#e58b45', futuristic: '#00ffc8', 'neon-noir': '#ff2bd6',
-    neosynth: '#00ff8c', 'night-ops': '#62a0ff', 'omarchy-live': '#f5c2e7', 'plasma-core': '#ff6bce',
-    'signal-cities': '#00f0ff', 'synth-industrial': '#a6e22e', synthwave: '#4cc9f0',
-    'terminal-ghost': '#9eff6e', tokyo: '#ff4fa3', mashup: '#ff2bd6'
-  };
-  const FAMILY_ICONS = {
-    alien: 'neosynth', 'cybercore-tech': 'cybercore-tech', cyberdark: 'cybercore-tech', 'cyberdark-grid': 'cybercore-tech',
-    'cyberdark-industrial': 'cyberdyne', 'cyberdark-ops': 'cyberdyne', cyberdyne: 'cyberdyne', cyberpunk: 'cyberpunk',
-    cyborg: 'cyberpunk', 'dark-futurism': 'dystopian', 'dark-skylines': 'cyberpunk', default: 'default',
-    dystopian: 'dystopian', 'dystopian-frontier': 'dystopian', futuristic: 'neosynth', 'neon-noir': 'cyberpunk',
-    neosynth: 'neosynth', 'night-ops': 'cyberdyne', 'omarchy-live': 'default', 'plasma-core': 'neosynth',
-    'signal-cities': 'cyberpunk', 'synth-industrial': 'cybercore-tech', synthwave: 'synthwave',
-    'terminal-ghost': 'default', tokyo: 'cyberpunk', mashup: 'mashup'
-  };
-  const FAMILY_DESCRIPTIONS = {
-    mashup: 'signature blends across the Cybercore palette families',
-    alien: 'extraterrestrial signals and orbital patterns', cyberdark: 'deep-space darkness with electric telemetry',
-    'cyberdark-grid': 'precision grids and architectural perspective', 'cyberdark-industrial': 'industrial systems and machine telemetry',
-    'cyberdark-ops': 'tactical overlays, targeting, and command systems', cyborg: 'human-machine interfaces and augmented vision',
-    'dark-futurism': 'monolithic silhouettes and speculative shadow', 'dark-skylines': 'dense city silhouettes after midnight',
-    'dystopian-frontier': 'weathered settlements beyond the perimeter', futuristic: 'clean orbital geometry and forward motion',
-    'neon-noir': 'rain, reflections, and detective-city glow', 'night-ops': 'low-light radar and covert operations',
-    'omarchy-live': 'live desktop surfaces and responsive controls', 'plasma-core': 'contained energy and magnetic turbulence',
-    'signal-cities': 'broadcast towers and connected urban signals', 'synth-industrial': 'mechanical rhythm with synthetic current',
-    'terminal-ghost': 'haunted terminals and residual machine text', tokyo: 'dense signage and electric boulevard light'
-  };
+  // Every family's label, colour, emblem and description live in families.js.
+  const FAMS = window.CC_FAMILIES || {};
+  const MASHUP_META = { label: 'SIGNATURE MASHUPS', short: 'MASHUPS', color: '#ff2bd6', desc: 'signature blends across the Cybercore palette families' };
+  const meta = family => (family === 'mashup' ? MASHUP_META : FAMS[family]) || {};
+  const LABELS = new Proxy({}, { get: (_, f) => meta(f).label });
+  const SHORT = new Proxy({}, { get: (_, f) => meta(f).short || meta(f).label });
+  const FAMILY_COLORS = Object.fromEntries([['mashup', MASHUP_META.color], ...Object.entries(FAMS).map(([f, m]) => [f, m.color])]);
+  const FAMILY_ICONS = new Proxy({}, { get: (_, f) => (f === 'mashup' || FAMS[f] ? f : undefined) });
+  const FAMILY_DESCRIPTIONS = new Proxy({}, { get: (_, f) => meta(f).desc });
   const $ = s => document.querySelector(s);
   const $$ = s => [...document.querySelectorAll(s)];
   const display = s => (s || 'unknown-family').replaceAll('-', ' ').toUpperCase();
@@ -298,7 +275,7 @@
   function buildFamilies() {
     const el = $('#families'); if (!el) return;
     const fams = [['all', allNames()], ...groups()];
-    el.innerHTML = fams.map(([f, names]) => `<button class="fam" role="tab" data-family="${f}" aria-selected="${f === activeFamily}" style="--fa:${f === 'all' ? 'var(--white)' : familyColor(f)}"><svg aria-hidden="true"><use href="#fam-${f === 'all' ? 'mashup' : familyIcon(f)}"/></svg>${f === 'all' ? 'ALL' : familyShort(f)}<em>${f === 'all' ? allNames().length + SITE.mashups.length : names.length}</em></button>`).join('');
+    el.innerHTML = fams.map(([f, names]) => `<button class="fam" role="tab" data-family="${f}" aria-selected="${f === activeFamily}" style="--fa:${f === 'all' ? 'var(--white)' : familyColor(f)}"><svg aria-hidden="true"><use href="#fam-${f === 'all' ? 'all' : familyIcon(f)}"/></svg>${f === 'all' ? 'ALL' : familyShort(f)}<em>${f === 'all' ? allNames().length + SITE.mashups.length : names.length}</em></button>`).join('');
     el.querySelectorAll('.fam').forEach(b => b.addEventListener('click', () => {
       activeFamily = b.dataset.family;
       el.querySelectorAll('.fam').forEach(x => x.setAttribute('aria-selected', String(x === b)));

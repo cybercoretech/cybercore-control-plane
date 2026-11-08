@@ -40,6 +40,18 @@ Open `http://127.0.0.1:8000/`. The theme engine uses the shared live theme
 registry and falls back to the embedded Cybercore palette when the registry is
 unavailable.
 
+## ✨ Theme families
+
+Every registry family is defined once in `assets/js/families.js`: its label,
+colour, description, 48×48 tab icon and 160×80 card scene. `assets/js/scenes.js`
+layers a modifier on top based on the theme's name ending (`-shards` cracks,
+`-vortex` spiral, `-phantom` haze, `-glitch` RGB slices, `-zenith`/`-horizon`
+moves the horizon …), so the 12 cards in a family never look identical.
+Mashups splice their base and accent family scenes along a diagonal seam.
+
+When the registry gains a family, add its entry to `families.js`; until then it
+falls back to the classic editor scene.
+
 ## ✨ Pages deployment
 
 Pushes to `main` run `.github/workflows/pages.yml`, which bundles the site once and

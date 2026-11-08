@@ -224,9 +224,11 @@
   $$('.reveal, .flow').forEach(el => still ? el.classList.add('in') : ro.observe(el));
 
   function countUp(el) {
-    const end = +el.dataset.count; const t0 = performance.now(); const d = 1400;
-    const step = t => { const k = Math.max(0, Math.min(1, (t - t0) / d)); el.textContent = Math.round(end * (1 - Math.pow(1 - k, 3))); if (k < 1) requestAnimationFrame(step); };
-    still ? (el.textContent = end) : requestAnimationFrame(step);
+    // Read the target every frame: the registry can land mid-animation and
+    // rewrite data-count (e.g. 50 families), and that live value must win.
+    const t0 = performance.now(); const d = 1400;
+    const step = t => { const k = Math.max(0, Math.min(1, (t - t0) / d)); el.textContent = Math.round(+el.dataset.count * (1 - Math.pow(1 - k, 3))); if (k < 1) requestAnimationFrame(step); };
+    still ? (el.textContent = el.dataset.count) : requestAnimationFrame(step);
   }
   const co = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { countUp(e.target); co.unobserve(e.target); } }));
   $$('[data-count]').forEach(el => co.observe(el));
@@ -260,23 +262,45 @@
     return `<p>${intro}</p>${content}<div class="stat-dialog-links">${statInfo[activeStat].links.map(([label, href]) => `<a href="${href}" ${href.startsWith('http') ? 'target="_blank" rel="noreferrer"' : ''}>${label} ↗</a>`).join('')}</div>`;
   }
   let activeStat = '';
-  function renderThemes(activeFamily = 'all') {
+  const SYNCING = '<p>Registry is still synchronizing. Reopen this panel in a moment.</p>';
+  const tabLabel = family => family === 'all' ? 'ALL THEMES' : family === 'mashup' ? 'MASHUPS' : familyLabel(family);
+  const colorOf = (registry, family) => family === 'all' ? 'var(--white)' : registry.colors[family] || '#ff2bd6';
+  function inventoryGroups(registry) {
+    const mashupIds = registry.mashups.map(m => m.id);
+    return [['all', [...mashupIds, ...Object.values(registry.families).flat()]], ['mashup', mashupIds], ...Object.entries(registry.families)];
+  }
+  function familyOfName(registry, name) {
+    if (registry.mashups.some(m => m.id === name)) return 'mashup';
+    return Object.keys(registry.families).find(family => registry.families[family].includes(name)) || 'mashup';
+  }
+  // One panel's items. Panels are built on first open, not all 52 up front
+  // (the old popup put 1,224 buttons in the DOM every time it opened).
+  function themeItems(registry, family, names) {
+    return names.map(name => {
+      const fam = family === 'all' ? familyOfName(registry, name) : family;
+      return `<button type="button" class="stat-theme-item" data-theme-id="${escapeHtml(name)}" data-theme-family="${escapeHtml(fam)}" style="--item-accent:${colorOf(registry, fam)}"><span class="stat-theme-art"></span><span class="stat-theme-label">${escapeHtml(name.replaceAll('-', ' ').toUpperCase())}</span></button>`;
+    }).join('');
+  }
+  function renderThemes() {
     const registry = window.CC?.registry;
-    if (!registry) return '<p>Registry is still synchronizing. Reopen this panel in a moment.</p>';
-    const sourceNames = Object.values(registry.families).flat();
-    const groups = [['all', [...sourceNames, ...registry.mashups.map(m => m.id)]], ['mashup', registry.mashups.map(m => m.id)], ...Object.entries(registry.families)];
-    const familyFor = name => name.startsWith('cc-') ? 'mashup' : Object.keys(registry.families).find(family => registry.families[family].includes(name)) || 'mashup';
-    const colorFor = family => registry.colors[family] || '#ff2bd6';
-    const tabs = groups.map(([family, names]) => `<button type="button" class="stat-explorer-tab${family === activeFamily ? ' is-active' : ''}" data-explorer-tab="${escapeHtml(family)}">${escapeHtml(family === 'all' ? 'ALL THEMES' : family === 'mashup' ? 'MASHUPS' : familyLabel(family))}<b>${names.length}</b></button>`).join('');
-    const panels = groups.map(([family, names]) => `<section class="stat-explorer-panel${family === activeFamily ? ' is-active' : ''}" data-explorer-panel="${escapeHtml(family)}"><div class="stat-theme-grid${family === 'all' ? ' is-compact' : ' is-cards'}">${names.map(name => `<button type="button" class="stat-theme-item" data-theme-id="${escapeHtml(name)}" data-theme-family="${escapeHtml(family === 'all' ? familyFor(name) : family)}" style="--item-accent:${colorFor(family === 'all' ? familyFor(name) : family)}"><span class="stat-theme-art"></span><span class="stat-theme-label">${escapeHtml(name.replaceAll('-', ' ').toUpperCase())}</span></button>`).join('')}</div></section>`).join('');
-    const back = activeFamily !== 'all' ? '<button type="button" class="stat-explorer-back">← BACK TO FAMILIES</button>' : '';
-    return explorerShell('The complete live inventory is grouped by registry family. Select a tab to scan every source palette and signature mashup without leaving the Control Plane.', `${back}<div class="stat-explorer-tabs">${tabs}</div>${panels}`);
+    if (!registry) return SYNCING;
+    const groups = inventoryGroups(registry);
+    const tabs = groups.map(([family, names]) => `<button type="button" class="stat-explorer-tab${family === 'all' ? ' is-active' : ''}" data-explorer-tab="${escapeHtml(family)}" aria-pressed="${family === 'all'}" style="--item-accent:${colorOf(registry, family)}">${family === 'all' ? '' : `<svg aria-hidden="true"><use href="#fam-${escapeHtml(registry.icons[family] || 'mashup')}"/></svg>`}<span>${escapeHtml(tabLabel(family))}</span><b>${names.length}</b></button>`).join('');
+    const panels = groups.map(([family]) => `<section class="stat-explorer-panel${family === 'all' ? ' is-active' : ''}" data-explorer-panel="${escapeHtml(family)}"><div class="stat-theme-grid${family === 'all' ? ' is-compact' : ' is-cards'}"></div></section>`).join('');
+    const filter = `<label class="stat-explorer-filter"><span>FILTER ${groups.length} TABS</span><input type="search" data-explorer-filter placeholder="cryo, ghost, synth…" autocomplete="off" spellcheck="false"></label>`;
+    return explorerShell(`The complete live inventory, grouped by registry family: ${groups.length - 2} families and the signature mashups. Pick a tab to scan its palettes; click any theme to apply it.`, `${filter}<div class="stat-explorer-tabs" role="group" aria-label="Inventory groups">${tabs}</div>${panels}`);
+  }
+  function renderFamilyView(family) {
+    const registry = window.CC?.registry;
+    if (!registry) return SYNCING;
+    const names = family === 'mashup' ? registry.mashups.map(m => m.id) : registry.families[family] || [];
+    return explorerShell(escapeHtml(registry.descriptions[family] || ''), `<button type="button" class="stat-explorer-back">← BACK TO ALL FAMILIES</button><section class="stat-explorer-panel is-active" data-explorer-panel="${escapeHtml(family)}"><div class="stat-theme-grid is-cards">${themeItems(registry, family, names)}</div></section>`);
   }
   function renderFamilies() {
     const registry = window.CC?.registry;
-    if (!registry) return '<p>Registry is still synchronizing. Reopen this panel in a moment.</p>';
-    const items = Object.entries(registry.families).map(([family, names]) => `<button type="button" class="stat-family-item" data-family-open="${escapeHtml(family)}" style="--item-accent:${registry.colors[family] || '#ff2bd6'}"><div><b>${escapeHtml(familyLabel(family))}</b><span>${names.length} THEMES</span></div><p>${escapeHtml(family.replaceAll('-', ' '))} visual language with a curated twelve-palette path in the canonical registry.</p></button>`).join('');
-    return explorerShell('Every canonical family is listed below with its live palette count and registry identity.', `<div class="stat-family-grid">${items}</div>`);
+    if (!registry) return SYNCING;
+    const items = Object.entries(registry.families).map(([family, names]) => `<button type="button" class="stat-family-item" data-family-open="${escapeHtml(family)}" style="--item-accent:${registry.colors[family] || '#ff2bd6'}"><div><b><svg aria-hidden="true"><use href="#fam-${escapeHtml(registry.icons[family] || 'mashup')}"/></svg>${escapeHtml(familyLabel(family))}</b><span>${names.length} THEMES</span></div><p>${escapeHtml(registry.descriptions[family] || '')}</p></button>`).join('');
+    return explorerShell(`All ${Object.keys(registry.families).length} canonical families with their live palette counts. Open one to see just its themes.`, `<div class="stat-family-grid">${items}</div>`);
   }
   function renderSlots() {
     return explorerShell('The palette contract is the shared interface between every theme, renderer, runtime, and published surface.', `<div class="stat-slot-grid">${slotInfo.map(([key, label, description], i) => `<article class="stat-slot-item"><b>${String(i + 1).padStart(2, '0')} / ${label}</b><code>--${key.replace('_', '-')}</code><p>${description}</p></article>`).join('')}</div>`);
@@ -290,7 +314,8 @@
     const panel = document.querySelector(`.stat-explorer-panel[data-explorer-panel="${CSS.escape(family)}"]`);
     if (!registry || !panel || !window.CC?.resolve || !window.CC_SCENE) return;
     const mashups = Object.fromEntries(registry.mashups.map(m => [m.id, m]));
-    panel.querySelectorAll('.stat-theme-item').forEach(async item => {
+    panel.querySelectorAll('.stat-theme-item:not(.is-rendered):not(.is-hydrating)').forEach(async item => {
+      item.classList.add('is-hydrating');
       try {
         const id = item.dataset.themeId;
         const p = await window.CC.resolve(id);
@@ -305,19 +330,35 @@
       }
     });
   }
+  // Clicks on theme items are delegated once on the dialog body, so lazily
+  // built panels need no extra wiring.
+  statDialogBody?.addEventListener('click', e => {
+    const item = e.target.closest('.stat-theme-item');
+    if (!item) return;
+    window.CC?.apply(item.dataset.themeId);
+    statDialog?.close();
+  });
+  function openPanel(family) {
+    const registry = window.CC?.registry;
+    const panel = statDialogBody.querySelector(`.stat-explorer-panel[data-explorer-panel="${CSS.escape(family)}"]`);
+    if (!registry || !panel) return;
+    $$('.stat-explorer-tab').forEach(tab => { const on = tab.dataset.explorerTab === family; tab.classList.toggle('is-active', on); tab.setAttribute('aria-pressed', String(on)); });
+    $$('.stat-explorer-panel').forEach(p => p.classList.toggle('is-active', p === panel));
+    const grid = panel.querySelector('.stat-theme-grid');
+    if (!grid.childElementCount) {
+      const names = (inventoryGroups(registry).find(([f]) => f === family) || [, []])[1];
+      grid.innerHTML = themeItems(registry, family, names);
+    }
+    hydrateThemeCards(family);
+  }
   function wireThemeExplorer() {
-    $$('.stat-explorer-tab').forEach(tab => tab.addEventListener('click', () => {
-      const family = tab.dataset.explorerTab;
-      $$('.stat-explorer-tab').forEach(item => item.classList.toggle('is-active', item === tab));
-      $$('.stat-explorer-panel').forEach(panel => panel.classList.toggle('is-active', panel.dataset.explorerPanel === family));
-      hydrateThemeCards(family);
-    }));
-    $$('.stat-theme-item').forEach(item => item.addEventListener('click', () => {
-      window.CC?.apply(item.dataset.themeId);
-      statDialog?.close();
-    }));
-    $('.stat-explorer-back')?.addEventListener('click', showFamilies);
-    hydrateThemeCards(document.querySelector('.stat-explorer-tab.is-active')?.dataset.explorerTab || 'all');
+    $$('.stat-explorer-tab').forEach(tab => tab.addEventListener('click', () => openPanel(tab.dataset.explorerTab)));
+    const filter = $('[data-explorer-filter]');
+    filter?.addEventListener('input', () => {
+      const q = filter.value.trim().toLowerCase().replace(/\s+/g, '-');
+      $$('.stat-explorer-tab').forEach(tab => { tab.hidden = Boolean(q) && tab.dataset.explorerTab !== 'all' && !tab.dataset.explorerTab.includes(q) && !tab.textContent.toLowerCase().replace(/\s+/g, '-').includes(q); });
+    });
+    openPanel('all');
   }
   function showFamilies() {
     activeStat = 'families';
@@ -325,15 +366,18 @@
     statDialogKicker.textContent = 'CYBERGRID / FAMILIES';
     statDialogBody.innerHTML = renderFamilies();
     statDialog.classList.add('is-explorer');
-    $$('.stat-family-item').forEach(item => item.addEventListener('click', () => showThemeFamily(item.dataset.familyOpen)));
+    $$('.stat-family-item').forEach(item => item.addEventListener('click', () => showFamilyView(item.dataset.familyOpen)));
   }
-  function showThemeFamily(family = 'all') {
-    activeStat = 'themes';
-    statDialogTitle.textContent = statInfo.themes.title;
-    statDialogKicker.textContent = 'CYBERGRID / THEMES';
-    statDialogBody.innerHTML = renderThemes(family);
+  // A family opened from FAMILY SIGNALS shows only that family's 12 themes.
+  function showFamilyView(family) {
+    activeStat = 'families';
+    statDialogTitle.textContent = familyLabel(family);
+    statDialogKicker.textContent = `CYBERGRID / FAMILIES / ${family.toUpperCase()}`;
+    statDialogBody.innerHTML = renderFamilyView(family);
     statDialog.classList.add('is-explorer');
-    wireThemeExplorer();
+    $('.stat-explorer-back')?.addEventListener('click', showFamilies);
+    hydrateThemeCards(family);
+    statDialogBody.scrollTop = 0;
   }
   const statInfo = {
     themes: {
@@ -366,7 +410,7 @@
     statDialogBody.innerHTML = content;
     statDialog.classList.toggle('is-explorer', key === 'themes' || key === 'families' || key === 'slots' || key === 'runtimes');
     if (key === 'themes') wireThemeExplorer();
-    $$('.stat-family-item').forEach(item => item.addEventListener('click', () => showThemeFamily(item.dataset.familyOpen)));
+    $$('.stat-family-item').forEach(item => item.addEventListener('click', () => showFamilyView(item.dataset.familyOpen)));
     statDialog.showModal();
   }
   $$('.stat-card').forEach(card => card.addEventListener('click', () => openStat(card.dataset.stat)));

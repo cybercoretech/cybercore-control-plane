@@ -304,6 +304,23 @@
       el.querySelectorAll('.fam').forEach(x => x.setAttribute('aria-selected', String(x === b)));
       renderCards();
     }));
+    // Phones: 52 stacked tabs push the cards ~3000px down, so the list starts
+    // collapsed (CSS hides it only below 680px) behind a show-all toggle.
+    el.classList.add('is-collapsed');
+    let toggle = $('#familiesToggle');
+    if (!toggle) {
+      toggle = document.createElement('button');
+      toggle.type = 'button'; toggle.id = 'familiesToggle'; toggle.className = 'families-toggle';
+      toggle.setAttribute('aria-controls', 'families');
+      el.after(toggle);
+      toggle.addEventListener('click', () => {
+        const collapsed = el.classList.toggle('is-collapsed');
+        toggle.setAttribute('aria-expanded', String(!collapsed));
+        toggle.textContent = collapsed ? `SHOW ALL ${fams.length} TABS ▾` : 'SHOW FEWER ▴';
+      });
+    }
+    toggle.setAttribute('aria-expanded', 'false');
+    toggle.textContent = `SHOW ALL ${fams.length} TABS ▾`;
   }
   function scene(id, p) {
     const m = mashOf(id) || parseMix(id);
@@ -313,7 +330,8 @@
   function cardStyle(p) { return Object.entries({ bg: 'bg', white: 'white', panel: 'panel', line: 'line', muted: 'muted', acid: 'acid_green', pink: 'hot_pink', cyan: 'cyan' }).map(([v, k]) => `--t-${v}:#${p[k]}`).join(';'); }
   async function renderCards() {
     const el = $('#cards'); if (!el) return;
-    const names = activeFamily === 'all' ? allNames() : activeFamily === 'mashup' ? SITE.mashups.map(m => m.id) : families[activeFamily] || [];
+    // ALL = every source palette plus the signature mashups, matching its badge.
+    const names = activeFamily === 'all' ? [...SITE.mashups.map(m => m.id), ...allNames()] : activeFamily === 'mashup' ? SITE.mashups.map(m => m.id) : families[activeFamily] || [];
     el.innerHTML = '<div class="loading">DECRYPTING PALETTES…</div>';
     const pals = await Promise.all(names.map(n => resolve(n).catch(() => null)));
     el.innerHTML = names.map((n, i) => {
@@ -442,7 +460,9 @@
       return {
         families: Object.fromEntries(Object.entries(families).map(([family, names]) => [family, [...names]])),
         mashups: SITE.mashups.map(m => ({ ...m })),
-        colors: { ...FAMILY_COLORS }
+        colors: { ...FAMILY_COLORS },
+        descriptions: Object.fromEntries(['mashup', ...Object.keys(families)].map(f => [f, familyDescription(f)])),
+        icons: Object.fromEntries(['mashup', ...Object.keys(families)].map(f => [f, familyIcon(f)]))
       };
     }
   };

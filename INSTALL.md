@@ -3,7 +3,7 @@
 ## 🌐 Hosted installation
 
 The Control Plane is already published as a static Pages application. Open
-the [live Control Plane](https://cybercoretech.github.io/cybercore-control-plane/)
+the [live Control Plane](https://cybercore-control-plane.pages.dev/)
 and bookmark it. This is the recommended path for browsing the 312-theme
 registry, family Cybercards, palette contract, and runtime surfaces.
 
